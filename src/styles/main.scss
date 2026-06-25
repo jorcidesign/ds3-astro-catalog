@@ -1,0 +1,11 @@
+// ============================================================
+// DS3 COMUNICACIONES — Design System v2
+// Entry point — importar en MainLayout.astro
+// ============================================================
+
+@forward 'tokens';
+@forward 'reset';
+@forward 'typography';
+@forward 'grid';
+@forward 'layout';
+@forward 'print';

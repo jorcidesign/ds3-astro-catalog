@@ -1,0 +1,37 @@
+// ============================================================
+// 5. LAYOUT HELPERS
+// ============================================================
+
+.container {
+  width: 100%;
+  max-width: var(--container-max);
+  margin-inline: auto;
+  padding-inline: var(--gutter);
+}
+
+.section    { padding-block: var(--sp-12); }
+.section-sm { padding-block: var(--sp-8);  }
+.section-lg { padding-block: var(--sp-20); }
+
+@media (min-width: 1024px) {
+  .section    { padding-block: var(--sp-16); }
+  .section-lg { padding-block: var(--sp-24); }
+}
+
+.divider {
+  border: none;
+  border-top: 1px solid var(--border);
+  margin-block: var(--sp-6);
+}
+
+// Surface backgrounds
+.bg-page  { background-color: var(--surface-page); }
+.bg-card  { background-color: var(--surface-card); }
+.bg-brand { background-color: var(--clr-p-500); color: var(--text-inverse); }
+.bg-dark  { background-color: var(--clr-n-900); color: var(--text-inverse); }
+
+// Sticky calibrado al header
+.sticky-top {
+  position: sticky;
+  top: calc(var(--header-h) + var(--sp-4));
+}

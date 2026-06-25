@@ -1,0 +1,41 @@
+// ============================================================
+// 8. PRINT
+// ============================================================
+
+@media print {
+  .bottom-bar,
+  .site-header,
+  .brand-nav,
+  .cta-stack,
+  .toast-stack,
+  .search-overlay,
+  .gallery-zoom {
+    display: none !important;
+  }
+
+  body {
+    padding-bottom: 0;
+    font-size: 12pt;
+    color: #000;
+    background: #fff;
+  }
+
+  .container {
+    max-width: 100%;
+    padding-inline: 0;
+  }
+
+  .product-card,
+  .benefit-card,
+  .usecase-card {
+    box-shadow: none;
+    border: 1px solid #ccc;
+    break-inside: avoid;
+  }
+
+  a[href]::after {
+    content: " (" attr(href) ")";
+    font-size: 9pt;
+    color: #666;
+  }
+}

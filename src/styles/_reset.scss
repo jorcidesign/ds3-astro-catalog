@@ -1,0 +1,106 @@
+// ============================================================
+// 2. RESET & BASE
+// ============================================================
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  font-size: 100%;
+  -webkit-text-size-adjust: 100%;
+  scroll-behavior: smooth;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  font-family: var(--font-sans);
+  font-size: var(--text-base);
+  font-weight: var(--fw-regular);
+  line-height: var(--lh-normal);
+  color: var(--text-hi);
+  background-color: var(--surface-page);
+  min-height: 100dvh;
+}
+
+@media (max-width: 767px) {
+  body {
+    padding-bottom: calc(var(--bottom-bar-h) + var(--safe-bottom));
+  }
+}
+
+img,
+video,
+svg {
+  display: block;
+  max-width: 100%;
+  height: auto;
+}
+
+a {
+  color: var(--text-link);
+  text-decoration: none;
+  transition: var(--t-color);
+
+  &:hover {
+    color: var(--text-link-hov);
+  }
+}
+
+button,
+input,
+select,
+textarea {
+  font: inherit;
+}
+
+ul,
+ol {
+  list-style: none;
+}
+
+:focus-visible {
+  outline: none;
+  box-shadow: var(--ring-focus);
+  border-radius: var(--radius-sm);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: .01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: .01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+::-webkit-scrollbar {
+  width: 5px;
+  height: 5px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--clr-n-300);
+  border-radius: var(--radius-full);
+
+  &:hover {
+    background: var(--clr-p-200);
+  }
+}
+
+::selection {
+  background: var(--clr-p-200);
+  color: var(--clr-p-900);
+}
