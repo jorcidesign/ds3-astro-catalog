@@ -1,283 +1,200 @@
 ---
-import type { SiteData, NavItem, SubNavItem } from '../types';
+import type { SiteData } from '../types';
 
 interface Props {
   site: SiteData;
   currentPath?: string;
 }
 
-const { site, currentPath } = Astro.props;
+const { site } = Astro.props;
 ---
 
-<header class="site-header">
+<header class="site-header" role="banner">
   <div class="header-inner">
-    <a href="/" class="logo-link">
-      <img src={site.logo} alt={site.siteName} class="logo" referrerpolicy="no-referrer" />
-      <span class="site-name">{site.siteName}</span>
-    </a>
 
-    <nav class="main-nav" id="main-nav" aria-label="Navegación principal">
-      <ul class="nav-list">
-        {site.mainNav.map((item: NavItem) => (
-          <li class={`nav-item ${item.children ? 'has-children' : ''}`}>
-            {item.children ? (
-              <>
-                <a
-                  href={item.href}
-                  class={`nav-link ${currentPath?.startsWith(item.href) ? 'active' : ''}`}
-                >
-                  {item.label}
-                </a>
-                <ul class="subnav">
-                  {item.children.map((child: SubNavItem) => (
-                    <li>
-                      <a
-                        href={child.href}
-                        class={`subnav-link ${currentPath === child.href ? 'active' : ''}`}
-                      >
-                        {child.label}
-                      </a>
-                    </li>
-                  ))}
-                </ul>
-              </>
-            ) : (
-              <a
-                href={item.href}
-                class={`nav-link ${currentPath === item.href ? 'active' : ''}`}
-              >
-                {item.label}
-              </a>
-            )}
-          </li>
-        ))}
-      </ul>
-    </nav>
-
-    <div class="header-actions">
-      <button class="search-btn" aria-label="Buscar">
-        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <circle cx="11" cy="11" r="8"></circle>
-          <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+    <!-- Izquierda: hamburger (mobile) -->
+    <div class="header-left">
+      <button
+        class="header-btn header-hamburger"
+        id="menu-btn"
+        aria-label="Abrir menú de navegación"
+        aria-expanded="false"
+        aria-controls="nav-drawer"
+      >
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+             stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <line x1="3" y1="6" x2="21" y2="6"/>
+          <line x1="3" y1="12" x2="21" y2="12"/>
+          <line x1="3" y1="18" x2="21" y2="18"/>
         </svg>
       </button>
     </div>
 
-    <button class="menu-toggle" id="menu-toggle" aria-label="Abrir menú">
-      <span class="bar"></span>
-      <span class="bar"></span>
-      <span class="bar"></span>
-    </button>
+    <!-- Centro (mobile) / Izquierda (desktop): Logo -->
+    <a href="/" class="site-logo" aria-label={`${site.siteName} — Inicio`}>
+      <img
+        src={site.logo}
+        alt={site.siteName}
+        class="site-logo__img"
+        referrerpolicy="no-referrer"
+      />
+    </a>
+
+    <!-- Desktop only: barra de contacto -->
+    <div class="header-contact" aria-label="Información de contacto">
+      <span>{site.contact.phone[0]}</span>
+      <span class="contact-sep" aria-hidden="true">·</span>
+      <strong>{site.contact.mobile[0]}</strong>
+      <span class="contact-sep" aria-hidden="true">·</span>
+      <span class="contact-hours">{site.contact.hours.weekdays}</span>
+    </div>
+
+    <!-- Derecha: search -->
+    <div class="header-actions">
+      <button class="header-btn" id="search-btn" aria-label="Buscar productos">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+             stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <circle cx="11" cy="11" r="8"/>
+          <path d="m21 21-4.35-4.35"/>
+        </svg>
+      </button>
+    </div>
+
   </div>
 </header>
 
-<script>
-  const menuToggle = document.getElementById('menu-toggle');
-  const mainNav = document.getElementById('main-nav');
-
-  menuToggle?.addEventListener('click', () => {
-    mainNav?.classList.toggle('is-open');
-    const isOpen = mainNav?.classList.contains('is-open');
-    menuToggle.setAttribute('aria-label', isOpen ? 'Cerrar menú' : 'Abrir menú');
-  });
-</script>
 
 <style>
   .site-header {
-    background: var(--surface-card);
-    border-bottom: 1px solid var(--border);
     position: sticky;
     top: 0;
     z-index: var(--z-sticky);
-    backdrop-filter: blur(8px);
+    background: #fff;
+    border-bottom: 1px solid var(--border);
+    height: 56px;
   }
 
   .header-inner {
+    display: grid;
+    grid-template-columns: 44px 1fr 44px;
+    align-items: center;
+    height: 100%;
+    padding-inline: var(--sp-3);
     max-width: var(--container-max);
     margin: 0 auto;
-    padding: 0 var(--gutter);
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    height: var(--header-h);
   }
 
-  .logo-link {
+  /* ── Left ── */
+  .header-left {
     display: flex;
     align-items: center;
-    gap: var(--sp-3);
+  }
+
+  /* ── Logo ── */
+  .site-logo {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
     text-decoration: none;
-    color: inherit;
-    flex-shrink: 0;
+    justify-self: center;
+    gap: 1px;
   }
 
-  .logo {
-    height: 36px;
+  .site-logo__img {
+    height: 32px;
     width: auto;
-  }
-
-  .site-name {
-    font-family: var(--font-display);
-    font-weight: var(--fw-bold);
-    color: var(--text-hi);
-    font-size: var(--text-md);
-  }
-
-  .nav-list {
-    display: flex;
-    gap: var(--sp-1);
-    list-style: none;
-    margin: 0;
-    padding: 0;
-  }
-
-  .nav-item {
-    position: relative;
-  }
-
-  .nav-link {
     display: block;
-    padding: var(--sp-2) var(--sp-3);
-    color: var(--text-mid);
-    font-size: var(--text-sm);
-    font-weight: var(--fw-medium);
-    border-radius: var(--radius-sm);
-    transition: var(--t-color);
-    text-decoration: none;
   }
 
-  .nav-link:hover,
-  .nav-link.active {
-    color: var(--text-hi);
-    background: var(--clr-n-100);
-  }
 
-  .subnav {
+
+  /* ── Contact bar (desktop only) ── */
+  .header-contact {
     display: none;
-    position: absolute;
-    top: 100%;
-    left: 0;
-    background: var(--surface-card);
-    border: 1px solid var(--border);
-    border-radius: var(--radius-md);
-    padding: var(--sp-2);
-    min-width: 200px;
-    box-shadow: var(--shadow-lg);
-    list-style: none;
   }
 
-  .has-children:hover .subnav,
-  .has-children:focus-within .subnav {
-    display: block;
-  }
-
-  .subnav-link {
-    display: block;
-    padding: var(--sp-2) var(--sp-3);
-    text-decoration: none;
-    color: var(--text-mid);
-    font-size: var(--text-sm);
-    border-radius: var(--radius-sm);
-    transition: var(--t-color);
-  }
-
-  .subnav-link:hover,
-  .subnav-link.active {
-    background: var(--clr-n-100);
-    color: var(--text-hi);
-  }
-
+  /* ── Actions ── */
   .header-actions {
     display: flex;
     align-items: center;
-    gap: var(--sp-2);
+    gap: var(--sp-1);
+    justify-self: end;
   }
 
-  .search-btn {
+  .header-btn {
+    position: relative;
+    width: 40px;
+    height: 40px;
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 40px;
-    height: 40px;
-    background: none;
+    background: transparent;
     border: none;
+    border-radius: var(--radius-md);
     cursor: pointer;
-    color: var(--text-mid);
-    border-radius: var(--radius-sm);
+    color: var(--clr-n-700);
     transition: var(--t-color);
+    -webkit-tap-highlight-color: transparent;
+  }
+  .header-btn:hover {
+    color: var(--clr-p-500);
+    background: var(--clr-n-50);
+  }
+  :global(.header-btn:focus-visible) {
+    outline: none;
+    box-shadow: var(--ring-focus);
   }
 
-  .search-btn:hover {
-    background: var(--clr-n-100);
-    color: var(--text-hi);
-  }
+  /* ── Desktop ── */
+  @media (min-width: 768px) {
+    .site-header {
+      height: var(--header-h);
+    }
 
-  .menu-toggle {
-    display: none;
-    background: none;
-    border: none;
-    cursor: pointer;
-    padding: var(--sp-2);
-  }
+    .header-inner {
+      grid-template-columns: auto 1fr auto;
+      gap: var(--sp-6);
+      padding-inline: var(--gutter);
+    }
 
-  .bar {
-    display: block;
-    width: 22px;
-    height: 2px;
-    background: var(--text-mid);
-    margin: 5px 0;
-    border-radius: var(--radius-full);
-    transition: var(--t-all);
-  }
-
-  .menu-toggle:hover .bar {
-    background: var(--text-hi);
-  }
-
-  @media (max-width: 768px) {
-    .main-nav {
+    .header-left {
       display: none;
     }
 
-    .menu-toggle {
-      display: block;
+    .site-logo {
+      align-items: flex-start;
+      justify-self: start;
     }
 
-    .main-nav.is-open {
+    .site-logo__img {
+      height: 38px;
+    }
+
+
+
+    .header-contact {
       display: flex;
-      flex-direction: column;
-      position: fixed;
-      top: var(--header-h);
-      left: 0;
-      right: 0;
-      background: var(--surface-card);
-      border-bottom: 1px solid var(--border);
-      padding: var(--sp-4) var(--gutter);
-      z-index: var(--z-sticky);
-      max-height: calc(100vh - var(--header-h));
-      overflow-y: auto;
+      align-items: center;
+      gap: var(--sp-2);
+      font-size: var(--text-sm);
+      color: var(--text-mid);
+      flex-wrap: wrap;
+      justify-content: center;
     }
 
-    .main-nav.is-open .nav-list {
-      flex-direction: column;
-      width: 100%;
+    .contact-sep {
+      color: var(--clr-n-300);
     }
 
-    .main-nav.is-open .nav-link {
-      padding: var(--sp-3) var(--sp-2);
-    }
-
-    .main-nav.is-open .subnav {
-      position: static;
-      box-shadow: none;
-      border: none;
-      padding-left: var(--sp-4);
-      background: var(--clr-n-50);
-      margin-top: var(--sp-1);
-    }
-
-    .header-actions {
+    .contact-hours {
       display: none;
+    }
+  }
+
+  @media (min-width: 1024px) {
+    .contact-hours {
+      display: inline;
     }
   }
 </style>

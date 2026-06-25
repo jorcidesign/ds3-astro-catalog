@@ -1,0 +1,88 @@
+---
+import type { SubNavItem } from '../types';
+
+interface Props {
+  categories: SubNavItem[];
+  activeHref?: string;
+  brandLabel?: string;
+}
+
+const { categories, activeHref, brandLabel } = Astro.props;
+---
+
+<nav
+  class="category-nav"
+  aria-label={brandLabel ? `Categorías ${brandLabel}` : 'Categorías'}
+>
+  <div class="container">
+    <div class="category-nav__inner">
+      {categories.map((cat: SubNavItem) => {
+        const isActive = activeHref === cat.href;
+        return (
+          <a
+            href={cat.href}
+            class={`category-nav__item${isActive ? ' is-active' : ''}`}
+            aria-current={isActive ? 'page' : undefined}
+          >
+            {cat.label}
+          </a>
+        );
+      })}
+    </div>
+  </div>
+</nav>
+
+<style>
+  .category-nav {
+    background: var(--surface-card);
+    border-bottom: 1px solid var(--border);
+    position: sticky;
+    top: 56px;
+    z-index: calc(var(--z-sticky) - 1);
+  }
+
+  .category-nav__inner {
+    display: flex;
+    align-items: center;
+    overflow-x: auto;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+    white-space: nowrap;
+  }
+  .category-nav__inner::-webkit-scrollbar {
+    display: none;
+  }
+
+  .category-nav__item {
+    flex-shrink: 0;
+    display: inline-flex;
+    align-items: center;
+    padding: var(--sp-3) var(--sp-4);
+    font-size: var(--text-sm);
+    font-weight: var(--fw-medium);
+    color: var(--text-mid);
+    text-decoration: none;
+    border-bottom: 2px solid transparent;
+    transition:
+      color var(--dur-150) var(--ease-out),
+      border-color var(--dur-150) var(--ease-out),
+      background-color var(--dur-150) var(--ease-out);
+    white-space: nowrap;
+  }
+  .category-nav__item:hover {
+    color: var(--text-brand);
+    background: var(--clr-p-50);
+  }
+  .category-nav__item.is-active {
+    color: var(--text-brand);
+    border-bottom-color: var(--clr-p-500);
+    font-weight: var(--fw-semibold);
+    background: var(--clr-p-50);
+  }
+
+  @media (min-width: 768px) {
+    .category-nav {
+      top: var(--header-h);
+    }
+  }
+</style>

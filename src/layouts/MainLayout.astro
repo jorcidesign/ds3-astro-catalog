@@ -1,10 +1,10 @@
 ---
-import type { SiteData, BreadcrumbItem } from '../types';
+import type { SiteData } from '../types';
 import Header from '../astro-components/Header.astro';
+import NavDrawer from '../astro-components/NavDrawer.astro';
 import Footer from '../astro-components/Footer.astro';
 import BrandNav from '../astro-components/BrandNav.astro';
 import BottomBar from '../astro-components/BottomBar.astro';
-import TrustStrip from '../astro-components/TrustStrip.astro';
 import TrustBar from '../astro-components/TrustBar.astro';
 import Toast from '../astro-components/Toast.astro';
 import '../styles/main.scss';
@@ -14,12 +14,23 @@ export interface Props {
   description?: string;
   site: SiteData;
   showBrandNav?: boolean;
-  showTrustStrip?: boolean;
-  breadcrumb?: BreadcrumbItem[];
+  showTrustBar?: boolean;
+  fullWidth?: boolean;
   currentPath?: string;
+  /** Schema.org JSON-LD as a plain object */
+  schemaOrg?: Record<string, unknown>;
 }
 
-const { title, description, site, showBrandNav = true, showTrustStrip = true, currentPath } = Astro.props;
+const {
+  title,
+  description,
+  site,
+  showBrandNav  = true,
+  showTrustBar  = true,
+  fullWidth     = false,
+  currentPath,
+  schemaOrg,
+} = Astro.props;
 ---
 
 <!doctype html>
@@ -37,34 +48,62 @@ const { title, description, site, showBrandNav = true, showTrustStrip = true, cu
       href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Poppins:wght@600;700;800&display=swap"
       rel="stylesheet"
     />
+
+    {schemaOrg && (
+      <script type="application/ld+json" set:html={JSON.stringify(schemaOrg)} />
+    )}
   </head>
+
   <body>
+    <!-- NavDrawer (mobile-only slide-in) -->
+    <NavDrawer site={site} />
+
+    <!-- Sticky header -->
     <Header site={site} currentPath={currentPath} />
+
+    <!-- Subnav slot: CategoryNav on product pages, BrandNav otherwise -->
     {showBrandNav && <BrandNav brands={site.brands} />}
-    {showTrustStrip && <TrustStrip />}
-    
-    <main class="main-content">
+    <slot name="subnav" />
+
+    <!-- Main content -->
+    <main id="main-content" class={fullWidth ? 'main-full' : 'main-contained'}>
       <slot />
     </main>
-    
-    <TrustBar />
+
+    <!-- Trust bar & Footer -->
+    {showTrustBar && <TrustBar />}
     <Footer site={site} />
-    <BottomBar whatsappNumber={site.contact.whatsapp} />
+
+    <!-- Bottom bar — product pages override this slot -->
+    <slot name="bottom-bar">
+      <BottomBar whatsappNumber={site.contact.whatsapp} />
+    </slot>
+
     <Toast />
   </body>
 </html>
 
 <style is:global>
-  .main-content {
+  body {
+    background: #fff;
+  }
+
+  /* Page types */
+  .main-contained {
     min-height: 60vh;
     max-width: var(--container-max);
     margin: 0 auto;
     padding: var(--sp-6) var(--gutter);
   }
 
+  .main-full {
+    min-height: 60vh;
+  }
+
   @media (max-width: 767px) {
-    .main-content {
-      padding-bottom: calc(var(--bottom-bar-h) + var(--sp-6));
+    .main-contained,
+    .main-full {
+      padding-bottom: calc(var(--bottom-bar-h) + var(--safe-bottom) + var(--sp-4));
     }
   }
 </style>

@@ -91,11 +91,12 @@ const brandProducts: ProductEntry[] = allProducts.filter((p: ProductEntry) =>
     margin: 0;
   }
 
+
   .product-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
     gap: var(--sp-5);
-    padding-bottom: var(--sp-8);
+    padding-block: var(--sp-6) var(--sp-8);
   }
 
   .empty-state {

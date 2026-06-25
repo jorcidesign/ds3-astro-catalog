@@ -2,135 +2,222 @@
 interface Props {
   price: number;
   currency?: string;
+  unit?: string;
+  includesIGV?: boolean;
 }
 
-const { price } = Astro.props;
-const priceAmount = price;
+const {
+  price,
+  currency = 'USD',
+  unit = 'rollo',
+  includesIGV = false,
+} = Astro.props;
 ---
 
-<div class="qty-control" data-price={priceAmount}>
-  <label class="qty-label" for="qty-input">Cantidad:</label>
-  <div class="qty-adjuster">
-    <button class="qty-btn qty-btn--minus" aria-label="Disminuir cantidad" disabled>-</button>
-    <input type="number" id="qty-input" class="qty-input" value="1" min="1" max="99" aria-label="Cantidad" />
-    <button class="qty-btn qty-btn--plus" aria-label="Aumentar cantidad">+</button>
+<div class="price-qty-row" data-unit-price={price}>
+
+  <!-- Precio -->
+  <div class="price-block">
+    <div class="price-main">
+      <span class="price-currency">{currency === 'USD' ? 'US$' : currency}</span>
+      <span class="price-amount" id="price-display">{price.toFixed(2)}</span>
+    </div>
+    <span class="price-note">
+      Precio por {unit} · {includesIGV ? 'Incluye IGV' : 'No incluye IGV'}
+    </span>
   </div>
-  <span class="qty-total" aria-live="polite"></span>
+
+  <!-- Cantidad -->
+  <div class="qty-control" aria-label="Cantidad">
+    <button class="qty-btn" id="qty-minus" aria-label="Reducir cantidad" disabled>
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+           stroke-width="2.5" stroke-linecap="round" aria-hidden="true">
+        <line x1="5" y1="12" x2="19" y2="12"/>
+      </svg>
+    </button>
+    <input
+      class="qty-input"
+      type="number"
+      id="qty-input"
+      name="qty"
+      value="1"
+      min="1"
+      max="99"
+      aria-label="Cantidad de unidades"
+    />
+    <button class="qty-btn" id="qty-plus" aria-label="Aumentar cantidad">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+           stroke-width="2.5" stroke-linecap="round" aria-hidden="true">
+        <line x1="12" y1="5" x2="12" y2="19"/>
+        <line x1="5" y1="12" x2="19" y2="12"/>
+      </svg>
+    </button>
+  </div>
+
 </div>
 
-<style>
-  .qty-control {
-    display: flex;
-    align-items: center;
-    gap: var(--sp-4);
+<!-- Live region for accessibility -->
+<div id="qty-announce" class="sr-only" aria-live="polite" aria-atomic="true"></div>
+
+<script>
+(function () {
+  const row       = document.querySelector<HTMLElement>('.price-qty-row');
+  const priceEl   = document.getElementById('price-display') as HTMLSpanElement | null;
+  const qtyInput  = document.getElementById('qty-input') as HTMLInputElement | null;
+  const minusBtn  = document.getElementById('qty-minus') as HTMLButtonElement | null;
+  const plusBtn   = document.getElementById('qty-plus') as HTMLButtonElement | null;
+  const announcer = document.getElementById('qty-announce') as HTMLElement | null;
+
+  if (!row || !qtyInput || !priceEl) return;
+
+  const unitPrice = parseFloat(row.dataset.unitPrice || '0');
+
+  function clamp(v: number) { return Math.max(1, Math.min(99, v)); }
+
+  function update() {
+    const qty = clamp(parseInt(qtyInput!.value) || 1);
+    qtyInput!.value = String(qty);
+
+    const total = (unitPrice * qty).toFixed(2);
+    priceEl!.textContent = total;
+
+    if (minusBtn) minusBtn.disabled = qty <= 1;
+    if (plusBtn)  plusBtn.disabled  = qty >= 99;
+
+    if (announcer) {
+      announcer.textContent = `${qty} unidad${qty > 1 ? 'es' : ''}: US$ ${total}`;
+    }
   }
 
-  .qty-label {
-    font-size: var(--text-sm);
-    font-weight: var(--fw-medium);
+  minusBtn?.addEventListener('click', () => {
+    qtyInput!.value = String(clamp((parseInt(qtyInput!.value) || 1) - 1));
+    update();
+  });
+
+  plusBtn?.addEventListener('click', () => {
+    qtyInput!.value = String(clamp((parseInt(qtyInput!.value) || 1) + 1));
+    update();
+  });
+
+  qtyInput.addEventListener('input', update);
+  qtyInput.addEventListener('blur', update);
+
+  update();
+}());
+</script>
+
+<style>
+  .sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+  }
+
+  .price-qty-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: nowrap; /* Asegura que el precio y el contador vayan siempre en la misma fila */
+    gap: var(--sp-2);
+  }
+
+  @media (min-width: 480px) {
+    .price-qty-row {
+      gap: var(--sp-4);
+    }
+  }
+
+  /* ── Price block ── */
+  .price-block {
+    display: flex;
+    flex-direction: column;
+    gap: var(--sp-0-5);
+  }
+
+  .price-main {
+    display: flex;
+    align-items: baseline;
+    gap: var(--sp-1);
+  }
+
+  .price-currency {
+    font-size: var(--text-lg);
+    font-weight: var(--fw-semibold);
+    color: var(--clr-p-500);
+    align-self: flex-start;
+    margin-top: 0.3em;
+  }
+
+  .price-amount {
+    font-family: var(--font-display);
+    font-size: clamp(1.75rem, 5vw, 2.25rem);
+    font-weight: var(--fw-extrabold);
+    color: var(--clr-p-500);
+    line-height: 1;
+    letter-spacing: -0.02em;
+  }
+
+  .price-note {
+    font-size: var(--text-xs);
     color: var(--text-mid);
   }
 
-  .qty-adjuster {
+  /* ── Qty control ── */
+  .qty-control {
     display: flex;
     align-items: center;
-    border: 1px solid var(--border);
-    border-radius: var(--radius-md);
+    border: 1.5px solid var(--border);
+    border-radius: var(--radius-lg);
     overflow: hidden;
+    background: #fff;
   }
 
   .qty-btn {
-    width: 40px;
-    height: 40px;
-    border: none;
-    background: var(--clr-n-50);
-    color: var(--text-hi);
-    font-size: var(--text-lg);
-    cursor: pointer;
-    transition: var(--t-color);
+    width: 44px;
+    height: 44px;
     display: flex;
     align-items: center;
     justify-content: center;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    color: var(--text-hi);
+    transition: background var(--dur-150) var(--ease-out);
+    flex-shrink: 0;
+    -webkit-tap-highlight-color: transparent;
   }
-
   .qty-btn:hover:not(:disabled) {
     background: var(--clr-n-100);
   }
-
   .qty-btn:disabled {
-    opacity: 0.4;
+    opacity: 0.35;
     cursor: not-allowed;
   }
 
   .qty-input {
     width: 52px;
-    height: 40px;
-    border: none;
-    border-left: 1px solid var(--border);
-    border-right: 1px solid var(--border);
+    height: 44px;
     text-align: center;
+    border: none;
+    border-inline: 1.5px solid var(--border);
+    background: transparent;
     font-size: var(--text-base);
     font-weight: var(--fw-semibold);
     color: var(--text-hi);
     -moz-appearance: textfield;
-    background: var(--clr-n-0);
   }
-
-  .qty-input::-webkit-outer-spin-button,
-  .qty-input::-webkit-inner-spin-button {
+  .qty-input::-webkit-inner-spin-button,
+  .qty-input::-webkit-outer-spin-button {
     -webkit-appearance: none;
   }
-
-  .qty-total {
-    font-size: var(--text-sm);
-    color: var(--text-mid);
+  .qty-input:focus {
+    outline: none;
+    background: var(--clr-p-50);
   }
 </style>
-
-<script>
-  document.querySelectorAll('.qty-control').forEach(ctrl => {
-    const input = ctrl.querySelector('.qty-input') as HTMLInputElement;
-    const minusBtn = ctrl.querySelector('.qty-btn--minus') as HTMLButtonElement;
-    const plusBtn = ctrl.querySelector('.qty-btn--plus') as HTMLButtonElement;
-    const totalEl = ctrl.querySelector('.qty-total') as HTMLElement;
-    const unitPrice = parseFloat((ctrl as HTMLElement).dataset.price || '0');
-
-    function update() {
-      const qty = parseInt(input.value) || 1;
-      minusBtn.disabled = qty <= 1;
-      plusBtn.disabled = qty >= 99;
-      if (totalEl && unitPrice > 0) {
-        const total = (unitPrice * qty).toFixed(2);
-        totalEl.textContent = `Total: $${total}`;
-      }
-    }
-
-    minusBtn.addEventListener('click', () => {
-      input.value = String(Math.max(1, parseInt(input.value) - 1));
-      update();
-    });
-
-    plusBtn.addEventListener('click', () => {
-      input.value = String(Math.min(99, parseInt(input.value) + 1));
-      update();
-    });
-
-    input.addEventListener('change', () => {
-      input.value = String(Math.max(1, Math.min(99, parseInt(input.value) || 1)));
-      update();
-    });
-
-    input.addEventListener('keydown', (e) => {
-      if (e.key === 'ArrowUp') {
-        e.preventDefault();
-        plusBtn.click();
-      }
-      if (e.key === 'ArrowDown') {
-        e.preventDefault();
-        minusBtn.click();
-      }
-    });
-
-    update();
-  });
-</script>

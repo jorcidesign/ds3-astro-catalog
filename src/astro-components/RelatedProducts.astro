@@ -11,34 +11,61 @@ const { products, title = 'También disponible' } = Astro.props;
 ---
 
 {products.length > 0 && (
-  <section class="related-products">
-    <h2 class="section-title">{title}</h2>
-    <div class="related-grid">
-      {products.map((p) => (
-        <ProductCard product={p} />
-      ))}
+  <section class="related" aria-labelledby="related-heading">
+    <div class="related__heading">
+      <div class="related__line" aria-hidden="true"></div>
+      <h2 class="related__title" id="related-heading">{title}</h2>
+      <div class="related__line" aria-hidden="true"></div>
+    </div>
+    <div class="related__grid">
+      {products.map((p) => <ProductCard product={p} />)}
     </div>
   </section>
 )}
 
 <style>
-  .related-products {
-    margin: var(--sp-12) 0;
+  .related {
+    padding-block: var(--sp-10) var(--sp-12);
   }
 
-  .section-title {
+  /* ── Decorated heading ── */
+  .related__heading {
+    display: flex;
+    align-items: center;
+    gap: var(--sp-4);
+    margin-bottom: var(--sp-8);
+  }
+
+  .related__line {
+    display: none; /* Ocultar líneas decorativas en móvil */
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+  }
+
+  .related__title {
+    font-family: var(--font-display);
     font-size: var(--text-xl);
     font-weight: var(--fw-bold);
     color: var(--text-hi);
-    margin-bottom: var(--sp-6);
-    padding-bottom: var(--sp-3);
-    border-bottom: 2px solid var(--border-brand);
-    display: inline-block;
+    text-align: center;
+    width: 100%;
   }
 
-  .related-grid {
+  @media (min-width: 768px) {
+    .related__line {
+      display: block; /* Mostrar líneas decorativas en pantallas más grandes */
+    }
+    .related__title {
+      width: auto;
+      white-space: nowrap; /* Mantener en una sola línea en desktop */
+    }
+  }
+
+  /* ── Grid ── */
+  .related__grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
     gap: var(--sp-5);
   }
 </style>

@@ -1,15 +1,18 @@
 ---
 import MainLayout from '../../../layouts/MainLayout.astro';
+import CategoryNav from '../../../astro-components/CategoryNav.astro';
 import ProductGallery from '../../../astro-components/ProductGallery.astro';
 import ProductKeyFeatures from '../../../astro-components/ProductKeyFeatures.astro';
 import ProductSpecs from '../../../astro-components/ProductSpecs.astro';
-import RelatedProducts from '../../../astro-components/RelatedProducts.astro';
 import QtyControl from '../../../astro-components/QtyControl.astro';
 import CTAStack from '../../../astro-components/CTAStack.astro';
+import ProductBottomBar from '../../../astro-components/ProductBottomBar.astro';
+import TrustStrip from '../../../astro-components/TrustStrip.astro';
+import RelatedProducts from '../../../astro-components/RelatedProducts.astro';
 import Tabs from '../../../astro-components/Tabs.astro';
 import FAQ from '../../../astro-components/FAQ.astro';
 import { getCollection, getEntry } from 'astro:content';
-import type { ProductEntry, BreadcrumbItem } from '../../../types';
+import type { ProductEntry, BreadcrumbItem, SubNavItem, NavItem } from '../../../types';
 
 export async function getStaticPaths() {
   const products = await getCollection('products');
@@ -24,301 +27,549 @@ export async function getStaticPaths() {
 
 const { entryId } = Astro.props;
 const product = await getEntry('products', entryId);
-const site = await getEntry('site', 'config');
+const site    = await getEntry('site', 'config');
 
 if (!product) return Astro.redirect('/404');
 
-const p = product.data;
+const p             = product.data;
 const canonicalSlug = p.slug.split('/').pop();
+const brandSlugLC   = p.brand.toLowerCase();
 
+/* Brand nav children for CategoryNav */
+const brandNavItem = site.data.mainNav.find(
+  (n: NavItem) => n.label.toLowerCase() === brandSlugLC || n.href.includes(brandSlugLC)
+);
+const brandCategories: SubNavItem[] = brandNavItem?.children ?? [];
+const activeCategoryHref = p.breadcrumb[2]?.href;
+
+/* Brand logo */
+const brandEntry   = site.data.brands.find((b: { slug: string }) => b.slug === brandSlugLC);
+const brandLogoUrl = brandEntry?.logo;
+
+/* Related products */
 let relatedEntries: typeof product[] = [];
 if (p.relatedProducts?.length) {
-  relatedEntries = (await Promise.all(p.relatedProducts.map((s: string) => getEntry('products', s)))).filter(Boolean) as typeof relatedEntries;
+  relatedEntries = (
+    await Promise.all(p.relatedProducts.map((s: string) => getEntry('products', s)))
+  ).filter(Boolean) as typeof relatedEntries;
 }
 
-const watxt = `Hola, me interesa el producto ${p.name} (SKU: ${p.sku})`;
+/* Datasheet */
 const datasheetUrl = p.downloads?.find((d: { type: string }) => d.type === 'datasheet')?.url;
+
+/* FAQ items */
+const faqItems = p.cable
+  ? [
+      {
+        question: `¿Cuántos metros tiene el rollo de ${p.cable.rollLength} ${p.cable.rollUnit}?`,
+        answer: `El rollo de ${p.cable.rollLength} ${p.cable.rollUnit} equivale a aproximadamente <strong>${Math.round(p.cable.rollLength * 0.3048)} metros</strong>. El embalaje reel-in-box viene libre de empalmes longitudinales, garantizando la longitud completa.`,
+      },
+      {
+        question: '¿Cuál es la diferencia entre CMR y CMP?',
+        answer: '<strong>CMR (Cable Riser)</strong> está diseñado para instalaciones verticales entre pisos y cumple ANSI/UL 1666 para propagación de llamas en espacios riser. <strong>CMP (Plenum)</strong> es para ductos de ventilación con estándares más exigentes de humo y toxicidad. Para la mayoría de oficinas y centros de datos, CMR es la opción correcta.',
+      },
+      {
+        question: '¿Este cable soporta PoE y PoE+?',
+        answer: 'Sí. El calibre 23 AWG y la construcción Cat 6 son compatibles con <strong>IEEE 802.3af (PoE, 15.4 W)</strong> y <strong>IEEE 802.3at (PoE+, 30 W)</strong>. El conductor sólido de 23 AWG mantiene la resistencia de lazo dentro de los límites especificados.',
+      },
+      {
+        question: '¿A cuántos MHz está caracterizado el cable?',
+        answer: 'El rendimiento es verificado independientemente y caracterizado a <strong>600 MHz</strong>, excediendo el requisito mínimo de 250 MHz de la categoría 6, lo que proporciona mayor margen de rendimiento para aplicaciones exigentes.',
+      },
+      {
+        question: '¿Hacen instalación o solo venden el material?',
+        answer: `DS3 Comunicaciones es distribuidor autorizado del material. Para referencias de instaladores certificados en Lima y provincias contáctanos al <strong>${site.data.contact.mobile[0]}</strong> o por WhatsApp.`,
+      },
+    ]
+  : [];
+
+/* Schema.org */
+const schemaOrg = p.seo?.schemaOrg
+  ? {
+      '@context': 'https://schema.org/',
+      '@type': 'Product',
+      name: p.seo.schemaOrg.name,
+      description: p.seo.schemaOrg.description,
+      brand: { '@type': 'Brand', name: p.seo.schemaOrg.brand },
+      sku: p.seo.schemaOrg.sku,
+      mpn: p.seo.schemaOrg.mpn,
+      image: p.images[0]?.src,
+      offers: {
+        '@type': 'Offer',
+        price: String((p.seo.schemaOrg.offers as { price: number }).price),
+        priceCurrency: (p.seo.schemaOrg.offers as { priceCurrency: string }).priceCurrency,
+        availability: `https://schema.org/${p.inStock ? 'InStock' : 'OutOfStock'}`,
+        seller: { '@type': 'Organization', name: site.data.siteName },
+      },
+    }
+  : undefined;
 ---
 
 <MainLayout
-  title={`${p.name} | ${p.brand}`}
-  description={p.shortDescription}
+  title={p.seo?.title ?? p.name}
+  description={p.seo?.description ?? p.shortDescription}
   site={site.data}
-  breadcrumb={p.breadcrumb}
-  currentPath={`/productos/${p.brand.toLowerCase()}/${canonicalSlug}`}
+  showBrandNav={false}
+  showTrustBar={true}
+  fullWidth={true}
+  currentPath={`/productos/${brandSlugLC}/${canonicalSlug}`}
+  schemaOrg={schemaOrg}
 >
-  <nav class="breadcrumb" aria-label="Breadcrumb">
-    <div class="container">
-      {p.breadcrumb.map((crumb: BreadcrumbItem, i: number) => (
-        <span class="crumb">
-          {i > 0 && <span class="separator" aria-hidden="true">/</span>}
-          {i < p.breadcrumb.length - 1
-            ? <a href={crumb.href}>{crumb.label}</a>
-            : <span aria-current="page">{crumb.label}</span>
-          }
-        </span>
-      ))}
-    </div>
-  </nav>
-
-  <div class="product-layout container">
-    <div class="product-gallery-col">
-      <ProductGallery images={p.images} productName={p.name} />
-    </div>
-
-    <div class="product-info-col">
-      <div class="product-header">
-        <span class="product-brand">{p.brand}</span>
-        <h1 class="product-title">{p.name}</h1>
-        <p class="product-sku">SKU: {p.sku}</p>
-      </div>
-
-      <p class="product-desc">{p.shortDescription}</p>
-
-      <div class="price-block">
-        {p.price.amount > 0 ? (
-          <>
-            <span class="price-amount">${p.price.amount.toFixed(2)}</span>
-            <span class="price-unit">/ {p.price.unit}</span>
-            {!p.price.includesIGV && <span class="price-tax">+ IGV</span>}
-          </>
-        ) : (
-          <span class="price-consult">Consultar precio</span>
-        )}
-        <span class={`badge ${p.inStock ? 'badge--success' : 'badge--danger'}`}>
-          {p.inStock ? 'En stock' : 'Sin stock'}
-        </span>
-      </div>
-
-      {p.keyFeatures?.length && <ProductKeyFeatures features={p.keyFeatures} />}
-
-      {p.inStock && p.price.amount > 0 && (
-        <QtyControl price={p.price.amount} />
-      )}
-
-      <CTAStack
-        whatsapp={site.data.contact.whatsapp}
-        whatsappText={watxt}
-        datasheetUrl={datasheetUrl}
-      />
-    </div>
-  </div>
-
-  <div class="product-tabs-section container">
-    <Tabs>
-      <Fragment slot="tab-desc">
-        {p.longDescription?.split('\n').map((para: string) => para.trim() ? <p>{para.trim()}</p> : null)}
-      </Fragment>
-
-      <Fragment slot="tab-specs">
-        {p.specTable?.length && <ProductSpecs specTable={p.specTable} />}
-      </Fragment>
-
-      <Fragment slot="tab-downloads">
-        {p.downloads?.length && (
-          <div class="downloads-grid">
-            {p.downloads.map((dl: { label: string; url: string }) => (
-              <a href={dl.url} target="_blank" rel="noopener" class="download-item">
-                <svg class="dl-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
-                  <path d="M12 15V3m0 12l-4-4m4 4l4-4M2 17l.621 2.485A2 2 0 004.561 21h14.878a2 2 0 001.94-1.515L22 17"/>
-                </svg>
-                <span>{dl.label}</span>
-              </a>
-            ))}
-          </div>
-        )}
-      </Fragment>
-    </Tabs>
-  </div>
-
-  {p.cable && (
-    <div class="container">
-      <FAQ items={[
-        { question: '¿Cuál es la longitud del rollo?', answer: `${p.cable.rollLength} ${p.cable.rollUnit}` },
-        { question: '¿Qué tipo de chaqueta tiene?', answer: p.cable.jacket },
-        { question: '¿Para qué aplicaciones es recomendado?', answer: p.cable.applications.join(', ') },
-      ]} />
-    </div>
+  <!-- Category submenu (sticky below header) -->
+  {brandCategories.length > 0 && (
+    <CategoryNav
+      slot="subnav"
+      categories={brandCategories}
+      activeHref={activeCategoryHref}
+      brandLabel={p.brand}
+    />
   )}
 
-  <RelatedProducts products={relatedEntries.map(e => e.data)} title="Productos relacionados" />
+  <!-- Product-specific mobile bottom bar -->
+  <ProductBottomBar
+    slot="bottom-bar"
+    productName={p.name}
+    sku={p.sku}
+    whatsapp={site.data.contact.whatsapp}
+  />
+
+  <!-- ── BREADCRUMB ── -->
+  <div class="container">
+    <nav class="breadcrumb" aria-label="Ruta de navegación">
+      {p.breadcrumb.map((crumb: BreadcrumbItem, i: number) => (
+        <span class="bc-item">
+          {i > 0 && <span class="bc-sep" aria-hidden="true">›</span>}
+          {i === 0 ? (
+            <a href={crumb.href} aria-label="Inicio">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                   stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+                <polyline points="9,22 9,12 15,12 15,22"/>
+              </svg>
+            </a>
+          ) : i < p.breadcrumb.length - 1 ? (
+            <a href={crumb.href}>{crumb.label}</a>
+          ) : (
+            <span class="bc-current" aria-current="page">{crumb.label}</span>
+          )}
+        </span>
+      ))}
+    </nav>
+  </div>
+
+  <!-- ── PRODUCT LAYOUT ── -->
+  <section class="product-section" aria-label="Información del producto">
+    <div class="container">
+      <div class="product-layout">
+
+        <!-- Left: gallery + trust strip (mobile only) -->
+        <div class="gallery-col">
+          <ProductGallery
+            images={p.images}
+            productName={p.name}
+            inStock={p.inStock}
+          />
+          <div class="trust-strip-mobile">
+            <TrustStrip />
+          </div>
+        </div>
+
+        <!-- Right: info sidebar (sticky on desktop) -->
+        <aside class="info-sidebar" aria-label="Detalles y compra">
+
+          <div class="info-card-details">
+            <!-- Brand logo + SKU -->
+            <div class="info-meta">
+              {brandLogoUrl ? (
+                <img
+                  src={brandLogoUrl}
+                  alt={`Logo ${p.brand}`}
+                  class="info-brand-logo"
+                  referrerpolicy="no-referrer"
+                />
+              ) : (
+                <span class="info-brand-text">{p.brand}</span>
+              )}
+              <span class="info-sku">SKU: {p.sku}</span>
+            </div>
+
+            <!-- Title + stock badge + description -->
+            <div>
+              <h1 class="info-title">{p.name}</h1>
+              <div class="info-stock-row">
+                <span class={`info-stock ${p.inStock ? 'info-stock--in' : 'info-stock--out'}`}>
+                  <span class="info-stock__dot" aria-hidden="true"></span>
+                  {p.inStock ? 'En stock' : 'Sin stock'}
+                </span>
+              </div>
+              <p class="info-desc">{p.shortDescription}</p>
+            </div>
+
+            <!-- Key features horizontal strip -->
+            {p.keyFeatures?.length && (
+              <ProductKeyFeatures features={p.keyFeatures} />
+            )}
+
+            <!-- Standards chips -->
+            {p.cable?.standards?.length && (
+              <div class="standards-block">
+                <p class="standards-label">Estándares</p>
+                <div class="chip-row">
+                  {p.cable.standards.map((s: string) => (
+                    <span class="chip">{s}</span>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+
+          <div class="info-card-actions">
+            <!-- Price + Qty -->
+            {p.price.amount > 0 ? (
+              <QtyControl
+                price={p.price.amount}
+                currency={p.price.currency}
+                unit={p.price.unit}
+                includesIGV={p.price.includesIGV}
+              />
+            ) : (
+              <p class="info-consult">Precio a consultar</p>
+            )}
+
+            <!-- CTA stack -->
+            <CTAStack
+              productName={p.name}
+              sku={p.sku}
+              whatsapp={site.data.contact.whatsapp}
+              datasheetUrl={datasheetUrl}
+            />
+          </div>
+        </aside>
+
+        <!-- Tabs: under gallery and details -->
+        <div class="product-tabs-col">
+          <Tabs>
+            <Fragment slot="tab-desc">
+              <div class="long-desc">
+                {p.longDescription
+                  ?.split('\n')
+                  .map((para: string) => para.trim())
+                  .filter(Boolean)
+                  .map((para: string) => <p>{para}</p>)
+                }
+              </div>
+            </Fragment>
+
+            <Fragment slot="tab-specs">
+              {p.specTable?.length && <ProductSpecs specTable={p.specTable} />}
+            </Fragment>
+
+            <Fragment slot="tab-apps">
+              {p.cable?.applications?.length && (
+                <div class="apps-grid">
+                  {p.cable.applications.map((app: string) => (
+                    <div class="app-item">
+                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none"
+                           stroke="var(--clr-p-500)" stroke-width="2"
+                           stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <polyline points="20 6 9 17 4 12"/>
+                      </svg>
+                      <span>{app}</span>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </Fragment>
+
+            <Fragment slot="tab-faq">
+              {faqItems.length > 0 && <FAQ items={faqItems} />}
+            </Fragment>
+          </Tabs>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- ── RELATED PRODUCTS ── -->
+  {relatedEntries.length > 0 && (
+    <section class="container">
+      <RelatedProducts
+        products={relatedEntries.map(e => e.data)}
+        title={`También disponible: Cables ${p.cable?.cableCategory?.toUpperCase() ?? 'AMP'} y relacionados`}
+      />
+    </section>
+  )}
+
 </MainLayout>
 
 <style>
+  /* ── Container ── */
+  .container {
+    width: 100%;
+    max-width: var(--container-max);
+    margin-inline: auto;
+    padding-inline: var(--gutter);
+  }
+
+  /* ── Breadcrumb ── */
   .breadcrumb {
-    padding: var(--sp-4) 0;
+    display: flex;
+    align-items: center;
+    gap: var(--sp-1);
+    overflow-x: auto;
+    scrollbar-width: none;
+    padding-block: var(--sp-3);
     font-size: var(--text-sm);
     color: var(--text-mid);
   }
+  .breadcrumb::-webkit-scrollbar { display: none; }
 
-  .breadcrumb .container {
+  .bc-item {
     display: flex;
     align-items: center;
-    gap: var(--sp-2);
-    flex-wrap: wrap;
+    gap: var(--sp-1);
+    white-space: nowrap;
+    flex-shrink: 0;
   }
-
-  .crumb {
-    display: inline-flex;
-    align-items: center;
-    gap: var(--sp-2);
+  .bc-item a {
+    color: var(--text-mid);
+    text-decoration: none;
+    transition: color var(--dur-150) var(--ease-out);
   }
+  .bc-item a:hover { color: var(--text-brand); }
+  .bc-sep { color: var(--clr-n-400); font-size: var(--text-xs); }
+  .bc-current { color: var(--text-brand); font-weight: var(--fw-medium); }
 
-  .crumb a {
-    color: var(--text-link);
-  }
+  /* ── Product section ── */
+  .product-section { padding-block: var(--sp-6) var(--sp-10); }
 
-  .crumb a:hover {
-    color: var(--text-link-hov);
-  }
-
-  .separator {
-    color: var(--border-strong);
-  }
-
+  /* ── Product grid ── */
   .product-layout {
     display: grid;
-    grid-template-columns: 1fr var(--product-aside-w);
-    gap: var(--sp-8);
-    margin-bottom: var(--sp-8);
+    grid-template-columns: minmax(0, 1fr);
+    gap: var(--sp-4);
     align-items: start;
   }
-
-  @media (max-width: 1024px) {
+  @media (min-width: 768px) {
     .product-layout {
-      grid-template-columns: 1fr;
+      grid-template-columns: minmax(0, 1fr) clamp(300px, 35vw, 420px);
+      gap: var(--sp-5);
+    }
+  }
+  @media (min-width: 1100px) {
+    .product-layout {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: var(--sp-6);
     }
   }
 
-  .product-gallery-col {
-    position: sticky;
-    top: calc(var(--header-h) + var(--sp-4));
+  /* ── Gallery column ── */
+  .gallery-col {
+    display: flex;
+    flex-direction: column;
+    gap: var(--sp-5);
   }
-
-  @media (max-width: 1024px) {
-    .product-gallery-col {
-      position: static;
+  @media (min-width: 768px) {
+    .gallery-col {
+      align-self: stretch; /* Permite que el contenedor se estire al alto de la info y la galería sea sticky adentro */
     }
   }
 
-  .product-header {
-    margin-bottom: var(--sp-4);
+  .trust-strip-mobile { display: block; }
+  @media (min-width: 768px) {
+    .trust-strip-mobile { display: none; }
   }
 
-  .product-brand {
-    font-size: var(--text-xs);
-    font-weight: var(--fw-semibold);
+  /* ── Info sidebar ── */
+  .info-sidebar {
+    display: flex;
+    flex-direction: column;
+    gap: var(--sp-5);
+  }
+  @media (min-width: 1100px) {
+    .info-sidebar {
+      display: contents;
+    }
+  }
+
+  /* ── Info card content containers ── */
+  .info-card-details,
+  .info-card-actions {
+    display: flex;
+    flex-direction: column;
+    gap: var(--sp-5);
+  }
+  @media (min-width: 768px) {
+    .info-card-details,
+    .info-card-actions {
+      background: #fff;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-xl);
+      padding: var(--sp-6);
+      box-shadow: var(--shadow-sm);
+    }
+  }
+
+  /* ── Meta ── */
+  .info-meta {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--sp-3);
+  }
+  .info-brand-logo { height: 20px; width: auto; }
+  .info-brand-text {
+    font-size: var(--text-sm);
+    font-weight: var(--fw-bold);
     color: var(--text-brand);
     text-transform: uppercase;
-    letter-spacing: var(--ls-widest);
+    letter-spacing: var(--ls-wide);
+  }
+  .info-sku {
+    font-size: var(--text-xs);
+    color: var(--text-mid);
+    font-family: var(--font-mono);
   }
 
-  .product-title {
-    font-size: var(--text-2xl);
+  /* ── Title ── */
+  .info-title {
+    font-family: var(--font-display);
+    font-size: var(--text-xl);
     font-weight: var(--fw-bold);
     color: var(--text-hi);
-    margin: var(--sp-1) 0 var(--sp-2);
-    line-height: var(--lh-tight);
+    line-height: var(--lh-snug);
+    letter-spacing: var(--ls-tight);
+    margin-bottom: var(--sp-2);
   }
 
-  .product-sku {
-    font-size: var(--text-sm);
-    color: var(--text-low);
-    margin: 0;
-  }
+  .info-stock-row { margin-bottom: var(--sp-3); }
 
-  .product-desc {
-    font-size: var(--text-base);
-    color: var(--text-mid);
-    line-height: var(--lh-relaxed);
-    margin: 0 0 var(--sp-5);
-  }
-
-  .price-block {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: baseline;
-    gap: var(--sp-3);
-    margin-bottom: var(--sp-6);
-  }
-
-  .price-amount {
-    font-size: var(--text-3xl);
-    font-weight: var(--fw-extrabold);
-    color: var(--clr-success-text);
-    font-family: var(--font-display);
-  }
-
-  .price-unit {
-    font-size: var(--text-base);
-    color: var(--text-mid);
-  }
-
-  .price-tax {
-    font-size: var(--text-sm);
-    color: var(--clr-error-text);
-    font-weight: var(--fw-semibold);
-  }
-
-  .price-consult {
-    font-size: var(--text-xl);
-    font-weight: var(--fw-semibold);
-    color: var(--text-brand);
-  }
-
-  .badge {
+  .info-stock {
     display: inline-flex;
     align-items: center;
-    padding: var(--sp-1) var(--sp-3);
+    gap: var(--sp-1);
+    padding: var(--sp-0-5) var(--sp-3);
     border-radius: var(--radius-full);
     font-size: var(--text-xs);
     font-weight: var(--fw-semibold);
+    letter-spacing: var(--ls-wide);
+    text-transform: uppercase;
+  }
+  .info-stock--in  { background: var(--clr-success-bg); color: var(--clr-success-text); }
+  .info-stock--out { background: var(--clr-error-bg);   color: var(--clr-error-text); }
+  .info-stock__dot {
+    display: block;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: currentColor;
+    flex-shrink: 0;
   }
 
-  .badge--success {
-    background: var(--clr-success-bg);
-    color: var(--clr-success-text);
+  .info-desc {
+    font-size: var(--text-sm);
+    color: var(--text-mid);
+    line-height: var(--lh-relaxed);
+    margin: 0;
   }
 
-  .badge--danger {
-    background: var(--clr-error-bg);
-    color: var(--clr-error-text);
+  .info-consult {
+    font-size: var(--text-lg);
+    font-weight: var(--fw-semibold);
+    color: var(--text-brand);
+    margin: 0;
   }
 
-  .product-tabs-section {
-    margin: var(--sp-8) 0;
+  /* ── Standards ── */
+  .standards-block {
+    padding-top: var(--sp-2);
+    border-top: 1px solid var(--border);
+  }
+  .standards-label {
+    font-size: var(--text-xs);
+    font-weight: var(--fw-semibold);
+    color: var(--text-mid);
+    letter-spacing: var(--ls-wide);
+    text-transform: uppercase;
+    margin-bottom: var(--sp-2);
+  }
+  .chip-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--sp-2);
+  }
+  .chip {
+    display: inline-flex;
+    padding: var(--sp-0-5) var(--sp-3);
+    border-radius: var(--radius-full);
+    font-size: var(--text-xs);
+    font-weight: var(--fw-medium);
+    background: var(--clr-n-100);
+    color: var(--text-mid);
+    border: 1px solid var(--border);
   }
 
-  .downloads-grid {
+  /* ── Tabs container ── */
+  .product-tabs-col {
+    grid-column: 1 / -1;
+  }
+  @media (min-width: 768px) {
+    .product-tabs-col {
+      background: #fff;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-xl);
+      padding: var(--sp-6);
+      box-shadow: var(--shadow-sm);
+    }
+  }
+  @media (min-width: 1100px) {
+    .product-tabs-col {
+      grid-column: span 2;
+    }
+  }
+
+  /* ── Long desc ── */
+  .long-desc {
+    max-width: 72ch;
+    display: flex;
+    flex-direction: column;
+    gap: var(--sp-4);
+    font-size: var(--text-base);
+    color: var(--text-mid);
+    line-height: var(--lh-relaxed);
+  }
+  @media (min-width: 1100px) {
+    .long-desc {
+      max-width: none;
+    }
+  }
+
+  /* ── Sticky Actions ── */
+  @media (min-width: 1100px) {
+    .info-card-actions {
+      position: sticky;
+      top: calc(var(--header-h) + 44px + var(--sp-4));
+      align-self: start;
+    }
+  }
+
+  /* ── Applications ── */
+  .apps-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
     gap: var(--sp-3);
   }
-
-  .download-item {
+  .app-item {
     display: flex;
     align-items: center;
     gap: var(--sp-3);
-    padding: var(--sp-3) var(--sp-4);
-    background: var(--surface-card);
-    border: 1px solid var(--border);
-    border-radius: var(--radius-md);
-    text-decoration: none;
-    color: var(--text-hi);
+    padding: var(--sp-4);
+    background: var(--clr-p-50);
+    border-radius: var(--radius-lg);
     font-size: var(--text-sm);
     font-weight: var(--fw-medium);
-    transition: var(--t-color);
+    color: var(--text-hi);
   }
-
-  .download-item:hover {
-    border-color: var(--border-strong);
-    background: var(--clr-n-50);
-  }
-
-  .dl-icon {
-    width: 20px;
-    height: 20px;
-    color: var(--text-brand);
-    flex-shrink: 0;
-  }
+  .app-item svg { flex-shrink: 0; }
 </style>

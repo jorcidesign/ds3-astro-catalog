@@ -4,145 +4,702 @@ import type { ProductImage } from '../types';
 interface Props {
   images: ProductImage[];
   productName: string;
+  inStock?: boolean;
 }
 
-const { images, productName } = Astro.props;
+const { images, productName, inStock = true } = Astro.props;
 
-const thumbnails: ProductImage[] = images.filter((img: ProductImage) => img.role !== 'main');
+const hasMultiple = images.length > 1;
 ---
 
-<div class="gallery" role="region" aria-label="Galería de imágenes">
-  <div class="gallery-main">
+<div class="gallery" id="gallery" role="region" aria-label="Galería de imágenes del producto">
+
+  <!-- Main image -->
+  <div class="gallery__main" id="gallery-main" aria-live="polite" aria-label="Imagen principal">
+    {inStock !== undefined && (
+      <div class="gallery__badge">
+        <span class={`stock-badge ${inStock ? 'stock-badge--in' : 'stock-badge--out'}`}>
+          <span class="stock-badge__dot" aria-hidden="true"></span>
+          {inStock ? 'En stock' : 'Sin stock'}
+        </span>
+      </div>
+    )}
+
     {images.map((img: ProductImage, i: number) => (
       <img
+        id={i === 0 ? 'gallery-main-img' : undefined}
+        class={`gallery__img${i === 0 ? ' is-active' : ''}`}
         src={img.src}
         alt={img.alt || productName}
-        class={`gallery-img ${i === 0 ? 'is-active' : ''}`}
-        data-index={i}
+        width="600"
+        height="600"
         loading={i === 0 ? 'eager' : 'lazy'}
+        fetchpriority={i === 0 ? 'high' : undefined}
         referrerpolicy="no-referrer"
+        data-index={i}
       />
     ))}
   </div>
-  {thumbnails.length > 0 && (
-    <div class="gallery-thumbs" role="tablist" aria-label="Thumbnails">
-      {thumbnails.map((img: ProductImage, i: number) => (
+
+  <!-- Thumbs -->
+  {hasMultiple && (
+    <div class="gallery__thumbs" role="list" aria-label="Miniaturas">
+      {images.map((img: ProductImage, i: number) => (
         <button
-          class={`thumb-btn ${i === 0 ? 'is-active' : ''}`}
-          role="tab"
-          aria-selected={i === 0 ? 'true' : 'false'}
-          aria-label={img.alt}
+          class={`gallery__thumb${i === 0 ? ' is-active' : ''}`}
+          role="listitem"
+          aria-label={img.alt || `Imagen ${i + 1}`}
+          aria-pressed={i === 0 ? 'true' : 'false'}
           data-index={i}
         >
-          <img src={img.src} alt={img.alt} loading="lazy" referrerpolicy="no-referrer" />
+          <img
+            src={img.src}
+            alt={img.alt || `Miniatura ${i + 1}`}
+            width="80"
+            height="80"
+            loading="lazy"
+            referrerpolicy="no-referrer"
+          />
         </button>
       ))}
     </div>
   )}
+
+  <!-- Dots (mobile-friendly) -->
+  {hasMultiple && (
+    <div class="gallery__dots" role="tablist" aria-label="Imagen activa">
+      {images.map((_: ProductImage, i: number) => (
+        <button
+          class={`gallery__dot${i === 0 ? ' is-active' : ''}`}
+          role="tab"
+          aria-selected={i === 0 ? 'true' : 'false'}
+          aria-label={`Imagen ${i + 1}`}
+          data-index={i}
+        ></button>
+      ))}
+    </div>
+  )}
+
 </div>
+
+<script>
+(function () {
+  let viewer: HTMLElement | null = null;
+  let stageImg: HTMLImageElement | null = null;
+  let zoomLevel: HTMLElement | null = null;
+  let images: { src: string; label: string }[] = [];
+  let currentIndex = 0;
+  let scale = 1;
+  let panX = 0;
+  let panY = 0;
+  let isDragging = false;
+  let dragStartX = 0;
+  let dragStartY = 0;
+  let dragOriginX = 0;
+  let dragOriginY = 0;
+  let isTouching = false;
+  let touchMode: 'idle' | 'one' | 'two' = 'idle';
+  let touchStartDist = 0;
+  let touchStartMidX = 0;
+  let touchStartMidY = 0;
+  let pinchBaseScale = 1;
+  const MIN_SCALE = 0.5;
+  const MAX_SCALE = 5;
+  const STEP = 0.25;
+
+  function createViewer() {
+    viewer = document.getElementById('image-viewer');
+    if (viewer) {
+      stageImg = viewer.querySelector<HTMLImageElement>('.viewer-image');
+      zoomLevel = viewer.querySelector<HTMLElement>('.viewer-zoom-level');
+      return;
+    }
+
+    viewer = document.createElement('div');
+    viewer.id = 'image-viewer';
+    viewer.className = 'image-viewer';
+    viewer.setAttribute('aria-hidden', 'true');
+    viewer.innerHTML = `
+      <div class="viewer-backdrop"></div>
+      <button class="viewer-close" aria-label="Cerrar">✕</button>
+      <button class="viewer-nav viewer-prev" aria-label="Anterior">‹</button>
+      <button class="viewer-nav viewer-next" aria-label="Siguiente">›</button>
+      <div class="viewer-stage">
+        <img class="viewer-image" src="" alt="" />
+      </div>
+      <div class="viewer-zoom-controls">
+        <button class="viewer-zoom-btn" data-zoom="out">−</button>
+        <span class="viewer-zoom-level">100%</span>
+        <button class="viewer-zoom-btn" data-zoom="in">+</button>
+      </div>
+    `;
+    document.body.appendChild(viewer);
+
+    stageImg = viewer.querySelector<HTMLImageElement>('.viewer-image');
+    zoomLevel = viewer.querySelector<HTMLElement>('.viewer-zoom-level');
+
+    const backdrop = viewer.querySelector('.viewer-backdrop');
+    const closeBtn = viewer.querySelector('.viewer-close');
+    const prevBtn = viewer.querySelector('.viewer-prev');
+    const nextBtn = viewer.querySelector('.viewer-next');
+    const zoomOut = viewer.querySelector('[data-zoom="out"]');
+    const zoomIn = viewer.querySelector('[data-zoom="in"]');
+
+    const setTransform = (transition = true) => {
+      if (!stageImg || !zoomLevel) return;
+      stageImg.classList.toggle('is-dragging', !transition);
+      stageImg.style.transform = `translate(${panX}px, ${panY}px) scale(${scale})`;
+      zoomLevel.textContent = `${Math.round(scale * 100)}%`;
+    };
+
+    const resetPan = () => { panX = 0; panY = 0; };
+
+    const close = () => {
+      if (!viewer) return;
+      viewer.classList.remove('is-open');
+      viewer.setAttribute('aria-hidden', 'true');
+      document.body.style.overflow = '';
+      scale = 1;
+      resetPan();
+      setTransform();
+    };
+
+    const prev = () => {
+      if (currentIndex > 0) open(currentIndex - 1);
+    };
+
+    const next = () => {
+      if (currentIndex < images.length - 1) open(currentIndex + 1);
+    };
+
+    const zoom = (dir: number) => {
+      scale = Math.max(MIN_SCALE, Math.min(MAX_SCALE, scale + dir * STEP));
+      if (scale <= 1) resetPan();
+      setTransform();
+    };
+
+    const open = (index: number) => {
+      if (index < 0 || index >= images.length || !viewer || !stageImg) return;
+      currentIndex = index;
+      scale = window.innerWidth < 768 ? 1.25 : 1;
+      resetPan();
+      stageImg.src = images[currentIndex].src;
+      stageImg.alt = images[currentIndex].label;
+      setTransform();
+      viewer.setAttribute('aria-hidden', 'false');
+      viewer.classList.add('is-open');
+      document.body.style.overflow = 'hidden';
+    };
+
+    const startDrag = (clientX: number, clientY: number) => {
+      if (scale <= 1) return;
+      isDragging = true;
+      dragStartX = clientX;
+      dragStartY = clientY;
+      dragOriginX = panX;
+      dragOriginY = panY;
+      setTransform(false);
+    };
+
+    const moveDrag = (clientX: number, clientY: number) => {
+      if (!isDragging || !stageImg) return;
+      const dx = clientX - dragStartX;
+      const dy = clientY - dragStartY;
+      panX = dragOriginX + dx;
+      panY = dragOriginY + dy;
+      stageImg.style.transform = `translate(${panX}px, ${panY}px) scale(${scale})`;
+    };
+
+    const stopDrag = () => {
+      isDragging = false;
+      setTransform(true);
+    };
+
+    backdrop?.addEventListener('click', close);
+    closeBtn?.addEventListener('click', close);
+    prevBtn?.addEventListener('click', prev);
+    nextBtn?.addEventListener('click', next);
+    zoomOut?.addEventListener('click', () => zoom(-1));
+    zoomIn?.addEventListener('click', () => zoom(1));
+
+    if (stageImg) {
+      stageImg.addEventListener('wheel', (e: WheelEvent) => {
+        e.preventDefault();
+        const delta = e.deltaY > 0 ? -1 : 1;
+        zoom(delta);
+      }, { passive: false });
+
+      stageImg.addEventListener('pointerdown', (e: PointerEvent) => {
+        if (e.button !== 0 || isTouching) return;
+        e.preventDefault();
+        stageImg!.setPointerCapture(e.pointerId);
+        startDrag(e.clientX, e.clientY);
+      });
+
+      stageImg.addEventListener('pointermove', (e: PointerEvent) => {
+        if (isTouching) return;
+        moveDrag(e.clientX, e.clientY);
+      });
+
+      stageImg.addEventListener('pointerup', () => {
+        if (isTouching) return;
+        stopDrag();
+      });
+
+      stageImg.addEventListener('pointercancel', () => {
+        if (isTouching) return;
+        stopDrag();
+      });
+
+      stageImg.addEventListener('touchstart', (e: TouchEvent) => {
+        e.preventDefault();
+        isTouching = true;
+
+        if (e.touches.length === 1 && scale > 1) {
+          touchMode = 'one';
+          const t = e.touches[0];
+          dragStartX = t.clientX;
+          dragStartY = t.clientY;
+          dragOriginX = panX;
+          dragOriginY = panY;
+          isDragging = true;
+          setTransform(false);
+        } else if (e.touches.length === 2) {
+          touchMode = 'two';
+          const t1 = e.touches[0];
+          const t2 = e.touches[1];
+          touchStartDist = Math.hypot(t1.clientX - t2.clientX, t1.clientY - t2.clientY);
+          touchStartMidX = (t1.clientX + t2.clientX) / 2;
+          touchStartMidY = (t1.clientY + t2.clientY) / 2;
+          pinchBaseScale = scale;
+          dragOriginX = panX;
+          dragOriginY = panY;
+          isDragging = true;
+          setTransform(false);
+        }
+      });
+
+      stageImg.addEventListener('touchmove', (e: TouchEvent) => {
+        e.preventDefault();
+
+        if (touchMode === 'one' && e.touches.length === 1) {
+          const t = e.touches[0];
+          moveDrag(t.clientX, t.clientY);
+        } else if (e.touches.length === 2) {
+          const t1 = e.touches[0];
+          const t2 = e.touches[1];
+          const newDist = Math.hypot(t1.clientX - t2.clientX, t1.clientY - t2.clientY);
+          const newMidX = (t1.clientX + t2.clientX) / 2;
+          const newMidY = (t1.clientY + t2.clientY) / 2;
+
+          if (touchMode === 'one') {
+            touchMode = 'two';
+            touchStartDist = newDist;
+            touchStartMidX = newMidX;
+            touchStartMidY = newMidY;
+            pinchBaseScale = scale;
+            dragOriginX = panX;
+            dragOriginY = panY;
+            return;
+          }
+
+          if (touchStartDist > 0) {
+            const pinchFactor = newDist / touchStartDist;
+            scale = Math.max(MIN_SCALE, Math.min(MAX_SCALE, pinchBaseScale * pinchFactor));
+          }
+
+          panX = dragOriginX + (newMidX - touchStartMidX);
+          panY = dragOriginY + (newMidY - touchStartMidY);
+          stageImg!.style.transform = `translate(${panX}px, ${panY}px) scale(${scale})`;
+          if (zoomLevel) zoomLevel.textContent = `${Math.round(scale * 100)}%`;
+        }
+      });
+
+      stageImg.addEventListener('touchend', (e: TouchEvent) => {
+        if (e.touches.length === 0) {
+          touchMode = 'idle';
+          isDragging = false;
+          isTouching = false;
+          setTransform(true);
+        } else if (e.touches.length === 1 && touchMode === 'two') {
+          touchMode = 'one';
+          const t = e.touches[0];
+          dragStartX = t.clientX;
+          dragStartY = t.clientY;
+          dragOriginX = panX;
+          dragOriginY = panY;
+          isDragging = true;
+          setTransform(false);
+        }
+      });
+
+      stageImg.addEventListener('touchcancel', () => {
+        touchMode = 'idle';
+        isDragging = false;
+        isTouching = false;
+        setTransform(true);
+      });
+    }
+
+    document.addEventListener('keydown', (e: KeyboardEvent) => {
+      if (!viewer || !viewer.classList.contains('is-open')) return;
+      if (e.key === 'Escape') { close(); return; }
+      if (e.key === 'ArrowLeft') { prev(); return; }
+      if (e.key === 'ArrowRight') { next(); return; }
+      if (e.key === '+' || e.key === '=') { zoom(1); return; }
+      if (e.key === '-') { zoom(-1); return; }
+    });
+
+    (viewer as any)._open = open;
+  }
+
+  function openViewer(imagesList: typeof images, startIndex: number) {
+    images = imagesList;
+    createViewer();
+    if (viewer && (viewer as any)._open) {
+      (viewer as any)._open(startIndex);
+    }
+  }
+
+  document.querySelectorAll('.gallery').forEach((gallery) => {
+    const mainImgs  = gallery.querySelectorAll<HTMLImageElement>('.gallery__img');
+    const thumbBtns = gallery.querySelectorAll<HTMLButtonElement>('.gallery__thumb');
+    const dots      = gallery.querySelectorAll<HTMLButtonElement>('.gallery__dot');
+    const mainEl    = gallery.querySelector<HTMLElement>('.gallery__main');
+
+    if (!mainImgs.length) return;
+
+    mainImgs.forEach((img, i) => {
+      img.dataset.index = String(i);
+    });
+
+    function activate(index: number) {
+      mainImgs.forEach((img, i) => img.classList.toggle('is-active', i === index));
+      thumbBtns.forEach((btn, i) => {
+        btn.classList.toggle('is-active', i === index);
+        btn.setAttribute('aria-pressed', i === index ? 'true' : 'false');
+      });
+      dots.forEach((dot, i) => {
+        dot.classList.toggle('is-active', i === index);
+        dot.setAttribute('aria-selected', i === index ? 'true' : 'false');
+      });
+    }
+
+    thumbBtns.forEach((btn, i) => btn.addEventListener('click', () => activate(i)));
+    dots.forEach((dot, i) => dot.addEventListener('click', () => activate(i)));
+
+    const imageList = Array.from(mainImgs).map(img => ({
+      src: img.src,
+      label: img.alt || ''
+    }));
+
+    // Click main active image → open in viewer
+    mainEl?.addEventListener('click', () => {
+      const active = gallery.querySelector<HTMLImageElement>('.gallery__img.is-active');
+      if (!active) return;
+      const index = parseInt(active.dataset.index || '0');
+      openViewer(imageList, index);
+    });
+  });
+}());
+</script>
 
 <style>
   .gallery {
     display: flex;
     flex-direction: column;
     gap: var(--sp-3);
+    width: 100%;
+    max-width: 320px;
+    margin-inline: auto;
   }
 
-  .gallery-main {
+  /* ── Main image area ── */
+  .gallery__main {
     position: relative;
-    background: var(--clr-n-50);
+    background: #fff;
     border: 1px solid var(--border);
-    border-radius: var(--radius-lg);
+    border-radius: var(--radius-xl);
     overflow: hidden;
+    cursor: zoom-in;
+    width: 100%;
     aspect-ratio: 4 / 3;
   }
 
-  .gallery-img {
+  .gallery__img {
     position: absolute;
     inset: 0;
     width: 100%;
     height: 100%;
     object-fit: contain;
-    padding: var(--sp-6);
+    padding: var(--sp-3) var(--sp-2);
     opacity: 0;
-    transition: opacity var(--dur-200) var(--ease-out);
+    transition: opacity var(--dur-200) var(--ease-out), transform var(--dur-300) var(--ease-out);
     pointer-events: none;
   }
-
-  .gallery-img.is-active {
+  .gallery__img.is-active {
     opacity: 1;
     pointer-events: auto;
   }
+  .gallery__main:hover .gallery__img.is-active {
+    transform: scale(1.03);
+  }
 
-  .gallery-thumbs {
-    display: flex;
+  /* ── Stock badge ── */
+  .gallery__badge {
+    position: absolute;
+    top: var(--sp-3);
+    left: var(--sp-3);
+    z-index: var(--z-raised);
+    pointer-events: none;
+  }
+
+  .stock-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--sp-1);
+    padding: var(--sp-0-5) var(--sp-3);
+    border-radius: var(--radius-full);
+    font-size: var(--text-xs);
+    font-weight: var(--fw-semibold);
+    letter-spacing: var(--ls-wide);
+    text-transform: uppercase;
+    white-space: nowrap;
+    line-height: 1.4;
+  }
+  .stock-badge--in  { background: var(--clr-success-bg); color: var(--clr-success-text); }
+  .stock-badge--out { background: var(--clr-error-bg); color: var(--clr-error-text); }
+
+  .stock-badge__dot {
+    display: block;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: currentColor;
+    flex-shrink: 0;
+  }
+
+  /* ── Thumbs ── */
+  .gallery__thumbs {
+    display: flex; /* Mostrar por defecto en móviles */
     gap: var(--sp-2);
     overflow-x: auto;
     scrollbar-width: none;
   }
+  .gallery__thumbs::-webkit-scrollbar { display: none; }
 
-  .gallery-thumbs::-webkit-scrollbar {
-    display: none;
-  }
-
-  .thumb-btn {
-    flex-shrink: 0;
-    width: 72px;
+  .gallery__thumb {
+    flex: 0 0 72px; /* Tamaño más compacto en móvil */
     height: 72px;
-    padding: 0;
     border: 2px solid var(--border);
     border-radius: var(--radius-md);
     overflow: hidden;
     cursor: pointer;
-    background: var(--clr-n-50);
-    transition: border-color var(--dur-150);
+    background: #fff;
+    padding: 0;
+    transition: border-color var(--dur-150) var(--ease-out);
   }
-
-  .thumb-btn:hover {
-    border-color: var(--border-strong);
-  }
-
-  .thumb-btn.is-active {
-    border-color: var(--clr-p-500);
-  }
-
-  .thumb-btn img {
+  .gallery__thumb img {
     width: 100%;
     height: 100%;
     object-fit: contain;
-    padding: var(--sp-1);
+    padding: var(--sp-1-5);
+    transition: transform var(--dur-300) var(--ease-out);
+  }
+  .gallery__thumb:hover {
+    border-color: var(--clr-n-400);
+  }
+  .gallery__thumb:hover img {
+    transform: scale(1.05);
+  }
+  .gallery__thumb.is-active {
+    border-color: var(--clr-p-500);
+  }
+
+  /* ── Dots ── */
+  .gallery__dots {
+    display: none; /* Ocultar por defecto en favor de las miniaturas */
+    justify-content: center;
+    gap: var(--sp-1-5);
+    padding-top: var(--sp-1);
+  }
+
+  .gallery__dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--clr-n-300);
+    border: none;
+    padding: 0;
+    cursor: pointer;
+    transition: background var(--dur-150) var(--ease-out), width var(--dur-150) var(--ease-out);
+    -webkit-tap-highlight-color: transparent;
+  }
+  .gallery__dot.is-active {
+    background: var(--clr-p-500);
+    width: 18px;
+    border-radius: 3px;
+  }
+
+  /* ── Responsive adjustments ── */
+  @media (max-width: 767px) {
+    .gallery__main {
+      max-height: 280px; /* Evita que crezca demasiado verticalmente en móvil */
+    }
+  }
+
+  @media (min-width: 768px) {
+    .gallery {
+      max-width: 480px;
+      margin-inline: 0;
+      position: sticky;
+      top: calc(var(--header-h) + 44px + var(--sp-4));
+      align-self: start;
+    }
+    .gallery__img {
+      padding: var(--sp-8) var(--sp-6);
+    }
+    .gallery__thumb {
+      flex: 0 0 88px;
+      height: 88px;
+    }
+  }
+
+  /* ── Image Viewer Modal ── */
+  :global(#image-viewer) {
+    display: none;
+    position: fixed;
+    inset: 0;
+    z-index: var(--z-modal);
+  }
+  :global(#image-viewer.is-open) {
+    display: block;
+  }
+
+  :global(.viewer-backdrop) {
+    position: absolute;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.92);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+  }
+
+  :global(.viewer-close) {
+    position: absolute;
+    top: var(--sp-4);
+    right: var(--sp-4);
+    z-index: 2;
+    width: 44px;
+    height: 44px;
+    display: grid;
+    place-items: center;
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    border-radius: var(--radius-md);
+    color: #fff;
+    font-size: 1.25rem;
+    cursor: pointer;
+    transition: background var(--dur-150) var(--ease-out);
+  }
+  :global(.viewer-close:hover) {
+    background: rgba(255, 255, 255, 0.15);
+  }
+
+  :global(.viewer-stage) {
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+  }
+
+  :global(.viewer-image) {
+    max-width: 90vw;
+    max-height: 90vh;
+    object-fit: contain;
+    transition: transform var(--dur-200) var(--ease-out);
+    will-change: transform;
+    touch-action: none;
+  }
+  :global(.viewer-image.is-dragging) {
+    transition: none;
+    cursor: grabbing;
+  }
+
+  :global(.viewer-nav) {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    z-index: 2;
+    width: 48px;
+    height: 48px;
+    display: grid;
+    place-items: center;
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    border-radius: var(--radius-full);
+    color: #fff;
+    font-size: 1.75rem;
+    cursor: pointer;
+    transition: background var(--dur-150) var(--ease-out);
+  }
+  :global(.viewer-nav:hover) {
+    background: rgba(255, 255, 255, 0.15);
+  }
+
+  :global(.viewer-prev) {
+    left: var(--sp-4);
+  }
+  :global(.viewer-next) {
+    right: var(--sp-4);
+  }
+
+  :global(.viewer-zoom-controls) {
+    position: absolute;
+    bottom: var(--sp-6);
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 2;
+    display: flex;
+    align-items: center;
+    gap: var(--sp-2);
+    background: rgba(0, 0, 0, 0.6);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: var(--radius-lg);
+    padding: var(--sp-2) var(--sp-4);
+  }
+
+  :global(.viewer-zoom-btn) {
+    width: 36px;
+    height: 36px;
+    display: grid;
+    place-items: center;
+    background: transparent;
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    border-radius: var(--radius-md);
+    color: #fff;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: background var(--dur-150) var(--ease-out);
+  }
+  :global(.viewer-zoom-btn:hover) {
+    background: rgba(255, 255, 255, 0.1);
+  }
+
+  :global(.viewer-zoom-level) {
+    font-family: var(--font-sans);
+    font-size: var(--text-xs);
+    color: rgba(255, 255, 255, 0.6);
+    min-width: 36px;
+    text-align: center;
+    letter-spacing: 0.05em;
+  }
+
+  @media (max-width: 768px) {
+    :global(.viewer-nav) {
+      display: none;
+    }
   }
 </style>
-
-<script>
-  document.querySelectorAll('.gallery').forEach(gallery => {
-    const mainImgs = gallery.querySelectorAll('.gallery-img');
-    const thumbBtns = gallery.querySelectorAll('.thumb-btn');
-
-    thumbBtns.forEach(btn => {
-      btn.addEventListener('click', () => {
-        const idx = parseInt((btn as HTMLElement).dataset.index || '0');
-        mainImgs.forEach((img, i) => img.classList.toggle('is-active', i === idx));
-        thumbBtns.forEach((b, i) => {
-          b.classList.toggle('is-active', i === idx);
-          b.setAttribute('aria-selected', i === idx ? 'true' : 'false');
-        });
-      });
-    });
-
-    gallery.querySelectorAll('.thumb-btn').forEach((btn, i) => {
-      btn.addEventListener('keydown', (e: Event) => {
-        const ke = e as KeyboardEvent;
-        const btns = [...gallery.querySelectorAll('.thumb-btn')] as HTMLElement[];
-        if (ke.key === 'ArrowRight') {
-          e.preventDefault();
-          btns[(i + 1) % btns.length].focus();
-        }
-        if (ke.key === 'ArrowLeft') {
-          e.preventDefault();
-          btns[(i - 1 + btns.length) % btns.length].focus();
-        }
-      });
-    });
-  });
-</script>
