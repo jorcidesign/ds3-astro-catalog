@@ -29,7 +29,7 @@ const featuredProducts = products.slice(0, 3);
       <div class="brand-grid">
         {site.data.brands.map((b: BrandEntry) => (
           <a href={b.href} class="brand-card">
-            <img src={b.logo} alt={b.name} loading="lazy" />
+            <img src={b.logo} alt={b.name} loading="lazy" referrerpolicy="no-referrer" />
             <span class="brand-name">{b.name}</span>
           </a>
         ))}

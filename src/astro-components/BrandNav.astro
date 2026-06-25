@@ -12,7 +12,7 @@ const { brands } = Astro.props;
   <div class="brand-nav-inner">
     {brands.map((brand: BrandEntry) => (
       <a href={brand.href} class="brand-logo-link" title={brand.name}>
-        <img src={brand.logo} alt={brand.name} loading="lazy" />
+        <img src={brand.logo} alt={brand.name} loading="lazy" referrerpolicy="no-referrer" />
       </a>
     ))}
   </div>

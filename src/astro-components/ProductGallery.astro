@@ -20,6 +20,7 @@ const thumbnails: ProductImage[] = images.filter((img: ProductImage) => img.role
         class={`gallery-img ${i === 0 ? 'is-active' : ''}`}
         data-index={i}
         loading={i === 0 ? 'eager' : 'lazy'}
+        referrerpolicy="no-referrer"
       />
     ))}
   </div>
@@ -33,7 +34,7 @@ const thumbnails: ProductImage[] = images.filter((img: ProductImage) => img.role
           aria-label={img.alt}
           data-index={i}
         >
-          <img src={img.src} alt={img.alt} loading="lazy" />
+          <img src={img.src} alt={img.alt} loading="lazy" referrerpolicy="no-referrer" />
         </button>
       ))}
     </div>

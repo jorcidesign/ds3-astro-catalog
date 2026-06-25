@@ -13,7 +13,7 @@ const year = new Date().getFullYear();
   <div class="footer-inner">
     <div class="footer-brand">
       <a href="/" class="footer-logo-link">
-        <img src={site.logo} alt={site.siteName} class="footer-logo" />
+        <img src={site.logo} alt={site.siteName} class="footer-logo" referrerpolicy="no-referrer" />
       </a>
       <p class="footer-tagline">{site.tagline}</p>
       <a
@@ -54,7 +54,7 @@ const year = new Date().getFullYear();
       <div class="brand-row">
         {site.brands.map((brand: BrandEntry) => (
           <a href={brand.href} title={brand.name}>
-            <img src={brand.logo} alt={brand.name} loading="lazy" />
+            <img src={brand.logo} alt={brand.name} loading="lazy" referrerpolicy="no-referrer" />
           </a>
         ))}
       </div>

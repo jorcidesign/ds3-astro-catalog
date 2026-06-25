@@ -14,7 +14,7 @@ const brandSlug = product.brand.toLowerCase();
 <article class="product-card">
   <a href={`/productos/${brandSlug}/${product.slug.split('/').pop()}`} class="card-link">
     <div class="card-image">
-      {mainImage && <img src={mainImage.src} alt={mainImage.alt} loading="lazy" />}
+      {mainImage && <img src={mainImage.src} alt={mainImage.alt} loading="lazy" referrerpolicy="no-referrer" />}
       {product.isNew && <span class="badge badge--new">Nuevo</span>}
     </div>
     <div class="card-body">

@@ -14,16 +14,16 @@
     }
   },
   "brands": [
-    { "name": "AMP", "slug": "amp", "logo": "http://www.ds3comunicaciones.com/belden/images/amp_logo2-91x20.jpg", "href": "/marcas/amp" },
-    { "name": "Cisco", "slug": "cisco", "logo": "http://www.ds3comunicaciones.com/cisco/images/logo-cisco.gif", "href": "/marcas/cisco" },
-    { "name": "MikroTik", "slug": "mikrotik", "logo": "http://www.ds3comunicaciones.com/belden/images/mikrotik_logo-100x24.png", "href": "/marcas/mikrotik" },
-    { "name": "Ubiquiti", "slug": "ubiquiti", "logo": "http://www.ds3comunicaciones.com/belden/images/ubnt_logo-100x47.png", "href": "/marcas/ubiquiti" },
-    { "name": "Panduit", "slug": "panduit", "logo": "http://www.ds3comunicaciones.com/panduit/images/panduit_logo.jpg", "href": "/marcas/panduit" },
-    { "name": "Belden", "slug": "belden", "logo": "http://www.ds3comunicaciones.com/belden/images/Belden-Logo-93x15.jpg", "href": "/marcas/belden" },
-    { "name": "Amphenol", "slug": "amphenol", "logo": "http://www.ds3comunicaciones.com/belden/images/amphenol_logo-100x21.jpg", "href": "/marcas/amphenol" },
-    { "name": "D-Link", "slug": "dlink", "logo": "http://www.ds3comunicaciones.com/belden/images/D-Link_Logo-100x26.jpg", "href": "/marcas/dlink" },
-    { "name": "TP-Link", "slug": "tplink", "logo": "http://www.ds3comunicaciones.com/belden/images/tp-link_logo-100x13.jpg", "href": "/marcas/tplink" },
-    { "name": "Trendnet", "slug": "trendnet", "logo": "http://www.ds3comunicaciones.com/belden/images/trendnet_logo-100x20.jpg", "href": "/marcas/trendnet" }
+    { "name": "AMP", "slug": "amp", "logo": "https://www.ds3comunicaciones.com/belden/images/amp_logo2-91x20.jpg", "href": "/marcas/amp" },
+    { "name": "Cisco", "slug": "cisco", "logo": "https://www.ds3comunicaciones.com/cisco/images/logo-cisco.gif", "href": "/marcas/cisco" },
+    { "name": "MikroTik", "slug": "mikrotik", "logo": "https://www.ds3comunicaciones.com/belden/images/mikrotik_logo-100x24.png", "href": "/marcas/mikrotik" },
+    { "name": "Ubiquiti", "slug": "ubiquiti", "logo": "https://www.ds3comunicaciones.com/belden/images/ubnt_logo-100x47.png", "href": "/marcas/ubiquiti" },
+    { "name": "Panduit", "slug": "panduit", "logo": "https://www.ds3comunicaciones.com/panduit/images/panduit_logo.jpg", "href": "/marcas/panduit" },
+    { "name": "Belden", "slug": "belden", "logo": "https://www.ds3comunicaciones.com/belden/images/Belden-Logo-93x15.jpg", "href": "/marcas/belden" },
+    { "name": "Amphenol", "slug": "amphenol", "logo": "https://www.ds3comunicaciones.com/belden/images/amphenol_logo-100x21.jpg", "href": "/marcas/amphenol" },
+    { "name": "D-Link", "slug": "dlink", "logo": "https://www.ds3comunicaciones.com/belden/images/D-Link_Logo-100x26.jpg", "href": "/marcas/dlink" },
+    { "name": "TP-Link", "slug": "tplink", "logo": "https://www.ds3comunicaciones.com/belden/images/tp-link_logo-100x13.jpg", "href": "/marcas/tplink" },
+    { "name": "Trendnet", "slug": "trendnet", "logo": "https://www.ds3comunicaciones.com/belden/images/trendnet_logo-100x20.jpg", "href": "/marcas/trendnet" }
   ],
   "mainNav": [
     { "label": "Inicio", "href": "/" },
