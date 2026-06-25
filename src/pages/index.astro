@@ -1,13 +1,171 @@
 ---
 import MainLayout from '../layouts/MainLayout.astro';
+import { getEntry, getCollection } from 'astro:content';
+import type { BrandEntry, ProductEntry, ProductImage } from '../types';
+
+const site = await getEntry('site', 'config');
+const products = await getCollection('products');
+const featuredProducts = products.slice(0, 3);
 ---
 
-<MainLayout title="Inicio">
-  <div id="app">
-    <p>Cargando aplicación...</p>
-  </div>
+<MainLayout
+  title="Inicio"
+  description={site.data.tagline}
+  site={site.data}
+  currentPath="/"
+>
+  <section class="hero">
+    <h1 class="hero-title">{site.data.siteName}</h1>
+    <p class="hero-tagline">{site.data.tagline}</p>
+  </section>
+
+  <section class="brands-section">
+    <h2 class="section-title">Nuestras marcas</h2>
+    <div class="brand-grid">
+      {site.data.brands.map((brand: BrandEntry) => (
+        <a href={brand.href} class="brand-card">
+          <img src={brand.logo} alt={brand.name} loading="lazy" />
+          <span class="brand-name">{brand.name}</span>
+        </a>
+      ))}
+    </div>
+  </section>
+
+  {featuredProducts.length > 0 && (
+    <section class="featured-section">
+      <h2 class="section-title">Productos destacados</h2>
+      <div class="product-grid">
+        {featuredProducts.map((p: ProductEntry) => {
+          const mainImg: ProductImage | undefined = p.data.images.find((i: ProductImage) => i.role === 'main');
+          const brandSlug = p.data.brand.toLowerCase();
+          return (
+            <a href={`/productos/${brandSlug}/${p.data.slug.split('/').pop()}`} class="featured-card">
+              {mainImg && <img src={mainImg.src} alt={mainImg.alt} class="featured-img" />}
+              <div class="featured-body">
+                <h3>{p.data.name}</h3>
+                <span class="featured-price">
+                  {p.data.price.amount > 0 ? `$${p.data.price.amount.toFixed(2)}` : 'Consultar precio'}
+                </span>
+              </div>
+            </a>
+          );
+        })}
+      </div>
+    </section>
+  )}
 </MainLayout>
 
-<script>
-  console.log('🚀 ds3-astro-catalog');
-</script>
+<style>
+  .hero {
+    text-align: center;
+    padding: 4rem 1rem 3rem;
+  }
+
+  .hero-title {
+    font-size: 2.5rem;
+    font-weight: 800;
+    color: #1a1a2e;
+    margin: 0 0 1rem;
+  }
+
+  .hero-tagline {
+    font-size: 1.125rem;
+    color: #6b7280;
+    max-width: 600px;
+    margin: 0 auto;
+    line-height: 1.6;
+  }
+
+  .section-title {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #111827;
+    margin: 0 0 1.5rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 3px solid #3b82f6;
+    display: inline-block;
+  }
+
+  .brands-section,
+  .featured-section {
+    padding: 2rem 1rem;
+  }
+
+  .brand-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+    gap: 1rem;
+    align-items: center;
+  }
+
+  .brand-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 1.25rem;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    text-decoration: none;
+    color: inherit;
+    transition: box-shadow 0.2s;
+  }
+
+  .brand-card:hover {
+    box-shadow: 0 4px 12px rgba(0,0,0,0.06);
+  }
+
+  .brand-card img {
+    max-height: 32px;
+    width: auto;
+  }
+
+  .brand-name {
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: #374151;
+  }
+
+  .product-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 1.5rem;
+  }
+
+  .featured-card {
+    display: block;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    overflow: hidden;
+    text-decoration: none;
+    color: inherit;
+    transition: box-shadow 0.2s;
+  }
+
+  .featured-card:hover {
+    box-shadow: 0 4px 16px rgba(0,0,0,0.08);
+  }
+
+  .featured-img {
+    width: 100%;
+    aspect-ratio: 4 / 3;
+    object-fit: contain;
+    padding: 1.5rem;
+    background: #f8f9fa;
+  }
+
+  .featured-body {
+    padding: 1rem;
+  }
+
+  .featured-body h3 {
+    font-size: 0.95rem;
+    font-weight: 600;
+    margin: 0 0 0.5rem;
+  }
+
+  .featured-price {
+    font-weight: 700;
+    color: #059669;
+  }
+</style>

@@ -1,0 +1,85 @@
+{
+  "slug": "amp/1859218-2",
+  "sku": "1859218-2",
+  "name": "Cable UTP AMP Categoría 6A Apantallado Chaqueta LSZH",
+  "shortDescription": "Cable Cat 6A apantallado con chaqueta LSZH. Soporte para 10 Gigabit Ethernet hasta 100 metros. Ideal para centros de datos y entornos de alta interferencia.",
+  "brand": "AMP",
+  "category": "cable-utp",
+  "price": {
+    "amount": 0,
+    "currency": "USD",
+    "includesIGV": false,
+    "unit": "rollo"
+  },
+  "inStock": true,
+  "images": [
+    {
+      "src": "https://www.ds3comunicaciones.com/AMP/images/1859218-2.jpg",
+      "alt": "Cable UTP AMP Cat 6A Apantallado LSZH 1859218-2",
+      "role": "main"
+    }
+  ],
+  "breadcrumb": [
+    { "label": "Inicio", "href": "/" },
+    { "label": "AMP", "href": "/marcas/amp" },
+    { "label": "Cable Cat 6A", "href": "/marcas/amp#cablecat6a" },
+    { "label": "1859218-2", "href": "/productos/amp/1859218-2" }
+  ],
+  "cable": {
+    "cableCategory": "cat6a",
+    "jacket": "LSZH",
+    "awg": 23,
+    "rollLength": 1000,
+    "rollUnit": "ft",
+    "pairs": 4,
+    "conductorType": "solido",
+    "nominalPropagationSpeed": "70%",
+    "voltage": "300 VAC o VDC",
+    "operatingTemp": "-20°C a 60°C",
+    "storageTemp": "-20°C a 80°C",
+    "standards": [
+      "TIA/EIA-568-B.2-10",
+      "ISO/IEC 11801 Clase EA",
+      "IEC 60332-1"
+    ],
+    "applications": [
+      "10 Gigabit Ethernet (10GBASE-T)",
+      "Gigabit Ethernet",
+      "PoE++",
+      "Centros de datos"
+    ]
+  },
+  "keyFeatures": [
+    { "icon": "cable", "label": "Categoría", "value": "Cat 6A (Clase EA)" },
+    { "icon": "shield-check", "label": "Chaqueta", "value": "LSZH Apantallado" },
+    { "icon": "zap", "label": "Velocidad", "value": "10 Gigabit Ethernet" },
+    { "icon": "ruler", "label": "Calibre", "value": "23 AWG" }
+  ],
+  "specTable": [
+    { "label": "Categoría", "value": "Cat 6A / Clase EA" },
+    { "label": "Chaqueta", "value": "LSZH Apantallado" },
+    { "label": "Velocidad máxima", "value": "10 Gbps a 100 m" },
+    { "label": "Frecuencia", "value": "500 MHz" },
+    { "label": "Calibre", "value": "23 AWG" }
+  ],
+  "longDescription": "Cable AMP Cat 6A apantallado con chaqueta LSZH. Soporta 10 Gigabit Ethernet conforme a TIA/EIA-568-B.2-10.",
+  "relatedProducts": ["amp/6-1427200-4", "amp/1859381-2"],
+  "seo": {
+    "title": "Cable AMP Cat 6A Apantallado LSZH 1859218-2 | DS3 Comunicaciones",
+    "description": "Cable Cat 6A apantallado LSZH, 10 Gigabit Ethernet, rollo 1000 ft. Lima, Perú.",
+    "keywords": ["cable cat 6a apantallado", "1859218-2", "10gbase-t peru", "amp categoria 6a"],
+    "schemaOrg": {
+      "name": "Cable UTP AMP Cat 6A Apantallado LSZH 1859218-2",
+      "description": "Cable Cat 6A apantallado LSZH 23 AWG.",
+      "brand": "AMP",
+      "sku": "1859218-2",
+      "mpn": "1859218-2",
+      "offers": {
+        "price": 0,
+        "priceCurrency": "USD",
+        "availability": "InStock",
+        "seller": "DS3 Comunicaciones"
+      }
+    }
+  }
+}

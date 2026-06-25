@@ -1,0 +1,157 @@
+---
+import type { SiteData, BrandEntry } from '../types';
+
+interface Props {
+  site: SiteData;
+}
+
+const { site } = Astro.props;
+---
+
+<footer class="site-footer">
+  <div class="footer-inner">
+    <div class="footer-section">
+      <h3 class="footer-title">Contacto</h3>
+      <ul class="footer-list">
+        {site.contact.phone.map((p: string) => (
+          <li><a href={`tel:${p.replace(/\D/g, '')}`}>{p}</a></li>
+        ))}
+        {site.contact.mobile.map((m: string) => (
+          <li><a href={`tel:${m.replace(/\D/g, '')}`}>{m}</a></li>
+        ))}
+        {site.contact.email.map((e: string) => (
+          <li><a href={`mailto:${e}`}>{e}</a></li>
+        ))}
+      </ul>
+      <p class="hours">
+        <strong>Horario:</strong><br />
+        {site.contact.hours.weekdays}<br />
+        {site.contact.hours.saturday}
+      </p>
+    </div>
+
+    <div class="footer-section">
+      <h3 class="footer-title">Marcas</h3>
+      <div class="brand-grid">
+        {site.brands.map((brand: BrandEntry) => (
+          <a href={brand.href} class="brand-link" title={brand.name}>
+            <img src={brand.logo} alt={brand.name} loading="lazy" />
+          </a>
+        ))}
+      </div>
+    </div>
+
+    <div class="footer-section">
+      <h3 class="footer-title">{site.siteName}</h3>
+      <p>{site.tagline}</p>
+      <a
+        href={`https://wa.me/${site.contact.whatsapp}`}
+        class="whatsapp-link"
+        target="_blank"
+        rel="noopener"
+      >
+        WhatsApp: +{site.contact.whatsapp}
+      </a>
+    </div>
+  </div>
+
+  <div class="footer-bottom">
+    <p>&copy; {new Date().getFullYear()} {site.siteName}. Todos los derechos reservados.</p>
+  </div>
+</footer>
+
+<style>
+  .site-footer {
+    background: #1a1a2e;
+    color: #ccc;
+    padding: 3rem 1rem 0;
+  }
+
+  .footer-inner {
+    max-width: 1280px;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 2rem;
+  }
+
+  .footer-title {
+    color: #fff;
+    font-size: 1rem;
+    font-weight: 700;
+    margin-bottom: 1rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+
+  .footer-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+
+  .footer-list a {
+    color: #ccc;
+    text-decoration: none;
+    display: block;
+    padding: 0.25rem 0;
+    font-size: 0.875rem;
+  }
+
+  .footer-list a:hover {
+    color: #fff;
+  }
+
+  .hours {
+    font-size: 0.875rem;
+    margin-top: 1rem;
+    line-height: 1.5;
+  }
+
+  .brand-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.75rem;
+    align-items: center;
+  }
+
+  .brand-link {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.5rem;
+    background: rgba(255,255,255,0.05);
+    border-radius: 4px;
+    transition: background 0.2s;
+  }
+
+  .brand-link:hover {
+    background: rgba(255,255,255,0.1);
+  }
+
+  .brand-link img {
+    max-height: 28px;
+    width: auto;
+    filter: brightness(0.9);
+  }
+
+  .whatsapp-link {
+    display: inline-block;
+    margin-top: 0.75rem;
+    padding: 0.5rem 1rem;
+    background: #25d366;
+    color: #fff;
+    text-decoration: none;
+    border-radius: 4px;
+    font-size: 0.875rem;
+    font-weight: 600;
+  }
+
+  .footer-bottom {
+    margin-top: 2rem;
+    padding: 1rem 0;
+    border-top: 1px solid rgba(255,255,255,0.1);
+    text-align: center;
+    font-size: 0.8rem;
+  }
+</style>

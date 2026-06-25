@@ -1,0 +1,85 @@
+{
+  "slug": "amp/1859381-2",
+  "sku": "1859381-2",
+  "name": "Cable UTP AMP Categoría 6A Chaqueta LSZH IEC-60332-3",
+  "shortDescription": "Cable Cat 6A con chaqueta LSZH que cumple IEC-60332-3 (ignífugo en haz de cables). Certificado para instalaciones de alta exigencia contra incendio.",
+  "brand": "AMP",
+  "category": "cable-utp",
+  "price": {
+    "amount": 0,
+    "currency": "USD",
+    "includesIGV": false,
+    "unit": "rollo"
+  },
+  "inStock": true,
+  "images": [
+    {
+      "src": "https://www.ds3comunicaciones.com/AMP/images/Caja.jpg",
+      "alt": "Cable UTP AMP Cat 6A LSZH IEC-60332-3 1859381-2",
+      "role": "main"
+    }
+  ],
+  "breadcrumb": [
+    { "label": "Inicio", "href": "/" },
+    { "label": "AMP", "href": "/marcas/amp" },
+    { "label": "Cable Cat 6A", "href": "/marcas/amp#cablecat6a" },
+    { "label": "1859381-2", "href": "/productos/amp/1859381-2" }
+  ],
+  "cable": {
+    "cableCategory": "cat6a",
+    "jacket": "LSZH",
+    "awg": 23,
+    "rollLength": 1000,
+    "rollUnit": "ft",
+    "pairs": 4,
+    "conductorType": "solido",
+    "nominalPropagationSpeed": "70%",
+    "voltage": "300 VAC o VDC",
+    "operatingTemp": "-20°C a 60°C",
+    "storageTemp": "-20°C a 80°C",
+    "standards": [
+      "TIA/EIA-568-B.2-10",
+      "ISO/IEC 11801 Clase EA",
+      "IEC 60332-3"
+    ],
+    "applications": [
+      "10 Gigabit Ethernet (10GBASE-T)",
+      "Gigabit Ethernet",
+      "PoE++",
+      "Instalaciones contra incendio certificadas"
+    ]
+  },
+  "keyFeatures": [
+    { "icon": "cable", "label": "Categoría", "value": "Cat 6A (Clase EA)" },
+    { "icon": "shield-check", "label": "Chaqueta", "value": "LSZH" },
+    { "icon": "flame", "label": "Resistencia fuego", "value": "IEC 60332-3" },
+    { "icon": "zap", "label": "Velocidad", "value": "10 Gigabit Ethernet" }
+  ],
+  "specTable": [
+    { "label": "Categoría", "value": "Cat 6A / Clase EA" },
+    { "label": "Chaqueta", "value": "LSZH" },
+    { "label": "Estándar fuego", "value": "IEC 60332-3 (haz de cables)" },
+    { "label": "Velocidad máxima", "value": "10 Gbps" },
+    { "label": "Calibre", "value": "23 AWG" }
+  ],
+  "longDescription": "Cable AMP Cat 6A LSZH con certificación IEC-60332-3, indicado para edificios con normativas estrictas de incendio.",
+  "relatedProducts": ["amp/6-1427200-4", "amp/1859218-2"],
+  "seo": {
+    "title": "Cable AMP Cat 6A LSZH IEC-60332-3 1859381-2 | DS3 Comunicaciones",
+    "description": "Cable Cat 6A LSZH certificado IEC-60332-3. 10 Gigabit. Lima, Perú.",
+    "keywords": ["cable cat 6a lszh iec 60332", "1859381-2", "amp categoria 6a ignifugo"],
+    "schemaOrg": {
+      "name": "Cable UTP AMP Cat 6A LSZH IEC-60332-3 1859381-2",
+      "description": "Cable Cat 6A LSZH 23 AWG, ignífugo IEC-60332-3.",
+      "brand": "AMP",
+      "sku": "1859381-2",
+      "mpn": "1859381-2",
+      "offers": {
+        "price": 0,
+        "priceCurrency": "USD",
+        "availability": "InStock",
+        "seller": "DS3 Comunicaciones"
+      }
+    }
+  }
+}

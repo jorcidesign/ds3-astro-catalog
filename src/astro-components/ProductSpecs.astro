@@ -1,0 +1,81 @@
+---
+import type { SpecRow } from '../types';
+
+interface Props {
+  specTable: SpecRow[];
+}
+
+const { specTable } = Astro.props;
+---
+
+<section class="specs">
+  <h2 class="section-title">Especificaciones técnicas</h2>
+  <div class="specs-table-wrapper">
+    <table class="specs-table">
+      <tbody>
+        {specTable.map((row: SpecRow, i: number) => (
+          <tr class={i % 2 === 0 ? 'even' : 'odd'}>
+            <th scope="row">{row.label}</th>
+            <td>{row.value}</td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<style>
+  .specs {
+    margin: 2rem 0;
+  }
+
+  .section-title {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: #111827;
+    margin: 0 0 1rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 2px solid #3b82f6;
+    display: inline-block;
+  }
+
+  .specs-table-wrapper {
+    overflow-x: auto;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+  }
+
+  .specs-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.875rem;
+  }
+
+  .specs-table th,
+  .specs-table td {
+    padding: 0.75rem 1rem;
+    text-align: left;
+    border-bottom: 1px solid #e5e7eb;
+  }
+
+  .specs-table tr:last-child th,
+  .specs-table tr:last-child td {
+    border-bottom: none;
+  }
+
+  .specs-table th {
+    width: 40%;
+    font-weight: 600;
+    color: #374151;
+    background: #f9fafb;
+  }
+
+  .specs-table td {
+    color: #6b7280;
+  }
+
+  .specs-table tr.even th,
+  .specs-table tr.even td {
+    background: #f9fafb;
+  }
+</style>

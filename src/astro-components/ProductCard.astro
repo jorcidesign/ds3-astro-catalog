@@ -1,0 +1,133 @@
+---
+import type { ProductData, ProductImage } from '../types';
+
+interface Props {
+  product: ProductData;
+}
+
+const { product } = Astro.props;
+
+const mainImage: ProductImage | undefined = product.images.find((img: ProductImage) => img.role === 'main');
+const brandSlug = product.brand.toLowerCase();
+---
+
+<article class="product-card">
+  <a href={`/productos/${brandSlug}/${product.slug.split('/').pop()}`} class="card-link">
+    {mainImage && (
+      <div class="card-image">
+        <img src={mainImage.src} alt={mainImage.alt} loading="lazy" />
+      </div>
+    )}
+
+    <div class="card-body">
+      <h3 class="card-title">{product.name}</h3>
+      <p class="card-desc">{product.shortDescription}</p>
+
+      <div class="card-meta">
+        <span class="card-brand">{product.brand}</span>
+        <span class="card-price">
+          {product.price.amount > 0
+            ? `$${product.price.amount.toFixed(2)}`
+            : 'Consultar precio'}
+        </span>
+      </div>
+
+      <span class="card-cta">Ver producto →</span>
+    </div>
+  </a>
+</article>
+
+<style>
+  .product-card {
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    overflow: hidden;
+    transition: box-shadow 0.2s, transform 0.2s;
+    background: #fff;
+  }
+
+  .product-card:hover {
+    box-shadow: 0 4px 16px rgba(0,0,0,0.08);
+    transform: translateY(-2px);
+  }
+
+  .card-link {
+    text-decoration: none;
+    color: inherit;
+    display: block;
+  }
+
+  .card-image {
+    aspect-ratio: 4 / 3;
+    overflow: hidden;
+    background: #f8f9fa;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .card-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    padding: 1rem;
+    transition: transform 0.3s;
+  }
+
+  .product-card:hover .card-image img {
+    transform: scale(1.05);
+  }
+
+  .card-body {
+    padding: 1rem;
+  }
+
+  .card-title {
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: #111827;
+    margin: 0 0 0.5rem;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  .card-desc {
+    font-size: 0.8rem;
+    color: #6b7280;
+    margin: 0 0 0.75rem;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  .card-meta {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.75rem;
+  }
+
+  .card-brand {
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: #3b82f6;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+  }
+
+  .card-price {
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: #059669;
+  }
+
+  .card-cta {
+    display: inline-block;
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: #3b82f6;
+  }
+</style>

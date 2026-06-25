@@ -1,0 +1,191 @@
+---
+import type { SiteData, NavItem, SubNavItem } from '../types';
+
+interface Props {
+  site: SiteData;
+  currentPath?: string;
+}
+
+const { site, currentPath } = Astro.props;
+---
+
+<header class="site-header">
+  <div class="header-inner">
+    <a href="/" class="logo-link">
+      <img src={site.logo} alt={site.siteName} class="logo" />
+      <span class="site-name">{site.siteName}</span>
+    </a>
+
+    <nav class="main-nav" aria-label="Navegación principal">
+      <ul class="nav-list">
+        {site.mainNav.map((item: NavItem) => (
+          <li class={`nav-item ${item.children ? 'has-children' : ''}`} set:html={undefined}>
+            {item.children ? (
+              <>
+                <a
+                  href={item.href}
+                  class={`nav-link ${currentPath?.startsWith(item.href) ? 'active' : ''}`}
+                >
+                  {item.label}
+                </a>
+                <ul class="subnav">
+                  {item.children.map((child: SubNavItem) => (
+                    <li>
+                      <a
+                        href={child.href}
+                        class={`subnav-link ${currentPath === child.href ? 'active' : ''}`}
+                      >
+                        {child.label}
+                      </a>
+                    </li>
+                  ))}
+                </ul>
+              </>
+            ) : (
+              <a
+                href={item.href}
+                class={`nav-link ${currentPath === item.href ? 'active' : ''}`}
+              >
+                {item.label}
+              </a>
+            )}
+          </li>
+        ))}
+      </ul>
+    </nav>
+
+    <button class="menu-toggle" aria-label="Abrir menú">
+      <span class="bar"></span>
+      <span class="bar"></span>
+      <span class="bar"></span>
+    </button>
+  </div>
+</header>
+
+<style>
+  .site-header {
+    background: #fff;
+    border-bottom: 1px solid #e0e0e0;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+
+  .header-inner {
+    max-width: 1280px;
+    margin: 0 auto;
+    padding: 0 1rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 64px;
+  }
+
+  .logo-link {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    text-decoration: none;
+    color: inherit;
+  }
+
+  .logo {
+    height: 36px;
+    width: auto;
+  }
+
+  .site-name {
+    font-weight: 700;
+    font-size: 1.125rem;
+    color: #1a1a2e;
+  }
+
+  .nav-list {
+    display: flex;
+    gap: 0.125rem;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+
+  .nav-item {
+    position: relative;
+  }
+
+  .nav-link {
+    display: block;
+    padding: 0.5rem 1rem;
+    text-decoration: none;
+    color: #333;
+    font-size: 0.875rem;
+    font-weight: 500;
+    border-radius: 4px;
+    transition: background 0.2s, color 0.2s;
+  }
+
+  .nav-link:hover,
+  .nav-link.active {
+    background: #f0f4f8;
+    color: #0056b3;
+  }
+
+  .subnav {
+    display: none;
+    position: absolute;
+    top: 100%;
+    left: 0;
+    background: #fff;
+    border: 1px solid #e0e0e0;
+    border-radius: 6px;
+    padding: 0.5rem 0;
+    min-width: 200px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+    list-style: none;
+  }
+
+  .has-children:hover .subnav,
+  .has-children:focus-within .subnav {
+    display: block;
+  }
+
+  .subnav-link {
+    display: block;
+    padding: 0.5rem 1rem;
+    text-decoration: none;
+    color: #333;
+    font-size: 0.875rem;
+    transition: background 0.2s;
+  }
+
+  .subnav-link:hover {
+    background: #f5f5f5;
+    color: #0056b3;
+  }
+
+  .menu-toggle {
+    display: none;
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 0.5rem;
+  }
+
+  .bar {
+    display: block;
+    width: 24px;
+    height: 2px;
+    background: #333;
+    margin: 5px 0;
+    transition: 0.3s;
+  }
+
+  @media (max-width: 768px) {
+    .main-nav {
+      display: none;
+    }
+
+    .menu-toggle {
+      display: block;
+    }
+  }
+</style>

@@ -1,0 +1,50 @@
+{
+  "siteName": "DS3 Comunicaciones",
+  "siteUrl": "https://ds3peru.github.io",
+  "logo": "https://www.ds3comunicaciones.com/mikrotik/images/Logo1.jpg",
+  "tagline": "Distribuidor de infraestructura de redes y telecomunicaciones en Perú",
+  "contact": {
+    "phone": ["(01) 533-4339"],
+    "mobile": ["+51 994 428 965", "+51 996 333 223"],
+    "email": ["netperu100@hotmail.com", "ventas@ds3comunicaciones.com"],
+    "whatsapp": "51994428965",
+    "hours": {
+      "weekdays": "Lunes a Viernes: 9:00 - 18:00",
+      "saturday": "Sábados: 9:00 - 13:00"
+    }
+  },
+  "brands": [
+    { "name": "AMP", "slug": "amp", "logo": "http://www.ds3comunicaciones.com/belden/images/amp_logo2-91x20.jpg", "href": "/marcas/amp" },
+    { "name": "Cisco", "slug": "cisco", "logo": "http://www.ds3comunicaciones.com/cisco/images/logo-cisco.gif", "href": "/marcas/cisco" },
+    { "name": "MikroTik", "slug": "mikrotik", "logo": "http://www.ds3comunicaciones.com/belden/images/mikrotik_logo-100x24.png", "href": "/marcas/mikrotik" },
+    { "name": "Ubiquiti", "slug": "ubiquiti", "logo": "http://www.ds3comunicaciones.com/belden/images/ubnt_logo-100x47.png", "href": "/marcas/ubiquiti" },
+    { "name": "Panduit", "slug": "panduit", "logo": "http://www.ds3comunicaciones.com/panduit/images/panduit_logo.jpg", "href": "/marcas/panduit" },
+    { "name": "Belden", "slug": "belden", "logo": "http://www.ds3comunicaciones.com/belden/images/Belden-Logo-93x15.jpg", "href": "/marcas/belden" },
+    { "name": "Amphenol", "slug": "amphenol", "logo": "http://www.ds3comunicaciones.com/belden/images/amphenol_logo-100x21.jpg", "href": "/marcas/amphenol" },
+    { "name": "D-Link", "slug": "dlink", "logo": "http://www.ds3comunicaciones.com/belden/images/D-Link_Logo-100x26.jpg", "href": "/marcas/dlink" },
+    { "name": "TP-Link", "slug": "tplink", "logo": "http://www.ds3comunicaciones.com/belden/images/tp-link_logo-100x13.jpg", "href": "/marcas/tplink" },
+    { "name": "Trendnet", "slug": "trendnet", "logo": "http://www.ds3comunicaciones.com/belden/images/trendnet_logo-100x20.jpg", "href": "/marcas/trendnet" }
+  ],
+  "mainNav": [
+    { "label": "Inicio", "href": "/" },
+    {
+      "label": "AMP",
+      "href": "/marcas/amp",
+      "children": [
+        { "label": "Cable Cat 5e", "href": "/marcas/amp#cablecat5e" },
+        { "label": "Cable Cat 6", "href": "/marcas/amp#cablecat6" },
+        { "label": "Cable Cat 6A", "href": "/marcas/amp#cablecat6a" },
+        { "label": "Cable Cat 7", "href": "/marcas/amp#cablecat7" },
+        { "label": "Conectores RJ45", "href": "/marcas/amp#conectores" },
+        { "label": "Jacks", "href": "/marcas/amp#jacks" },
+        { "label": "Patch Panel", "href": "/marcas/amp#panel" },
+        { "label": "Patch Cord", "href": "/marcas/amp#cord" }
+      ]
+    },
+    { "label": "Cisco", "href": "/marcas/cisco" },
+    { "label": "MikroTik", "href": "/marcas/mikrotik" },
+    { "label": "Ubiquiti", "href": "/marcas/ubiquiti" },
+    { "label": "Soporte", "href": "/soporte" },
+    { "label": "Acerca de Nosotros", "href": "/nosotros" }
+  ]
+}

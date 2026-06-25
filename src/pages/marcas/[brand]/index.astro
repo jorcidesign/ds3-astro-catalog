@@ -1,0 +1,97 @@
+---
+import MainLayout from '../../../layouts/MainLayout.astro';
+import ProductCard from '../../../astro-components/ProductCard.astro';
+import { getEntry, getCollection } from 'astro:content';
+import type { BrandEntry, ProductEntry } from '../../../types';
+
+export async function getStaticPaths() {
+  const site = await getEntry('site', 'config');
+  if (!site) return [];
+
+  return site.data.brands.map((brand: BrandEntry) => ({
+    params: { brand: brand.slug },
+    props: { brandSlug: brand.slug },
+  }));
+}
+
+const { brandSlug } = Astro.props;
+const site = await getEntry('site', 'config');
+const allProducts = await getCollection('products');
+
+const brandEntry: BrandEntry | undefined = site?.data.brands.find((b: BrandEntry) => b.slug === brandSlug);
+const brandProducts: ProductEntry[] = allProducts.filter((p: ProductEntry) =>
+  p.data.brand.toLowerCase() === brandSlug
+);
+---
+
+<MainLayout
+  title={brandEntry?.name ?? brandSlug}
+  description={`Productos ${brandEntry?.name ?? brandSlug} — ${site?.data.siteName}`}
+  site={site!.data}
+  currentPath={`/marcas/${brandSlug}`}
+>
+  <section class="page-header">
+    {brandEntry && (
+      <div class="brand-hero">
+        <img src={brandEntry.logo} alt={brandEntry.name} class="brand-logo" />
+        <h1>{brandEntry.name}</h1>
+      </div>
+    )}
+    {!brandEntry && <h1>{brandSlug}</h1>}
+    <p class="product-count">{brandProducts.length} producto(s)</p>
+  </section>
+
+  {brandProducts.length > 0 ? (
+    <div class="product-grid">
+      {brandProducts.map((p: ProductEntry) => (
+        <ProductCard product={p.data} />
+      ))}
+    </div>
+  ) : (
+    <p class="empty-state">No hay productos disponibles para esta marca.</p>
+  )}
+</MainLayout>
+
+<style>
+  .page-header {
+    padding: 1rem 0 2rem;
+  }
+
+  .brand-hero {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 0.5rem;
+  }
+
+  .brand-logo {
+    max-height: 40px;
+    width: auto;
+  }
+
+  .brand-hero h1 {
+    font-size: 1.75rem;
+    font-weight: 800;
+    color: #111827;
+    margin: 0;
+  }
+
+  .product-count {
+    color: #6b7280;
+    font-size: 0.9rem;
+    margin: 0.25rem 0 0;
+  }
+
+  .product-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 1.5rem;
+    padding-bottom: 3rem;
+  }
+
+  .empty-state {
+    text-align: center;
+    color: #9ca3af;
+    padding: 3rem 0;
+  }
+</style>

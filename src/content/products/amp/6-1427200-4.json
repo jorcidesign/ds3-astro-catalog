@@ -1,0 +1,132 @@
+{
+  "slug": "amp/6-1427200-4",
+  "sku": "6-1427200-4",
+  "name": "Cable UTP AMP NetConnect Categoría 6 Chaqueta CMR 23AWG",
+  "shortDescription": "Cable de red Cat 6 de 23 AWG con chaqueta CMR (riser) en rollo de 1000 ft. Excede los requerimientos TIA/EIA-568-B.2-1 e ISO/IEC 11801 Clase E. Ideal para Gigabit Ethernet y aplicaciones de voz/video IP.",
+  "brand": "AMP",
+  "category": "cable-utp",
+  "price": {
+    "amount": 187.0,
+    "currency": "USD",
+    "includesIGV": false,
+    "unit": "rollo"
+  },
+  "inStock": true,
+  "isNew": false,
+  "images": [
+    {
+      "src": "https://www.ds3comunicaciones.com/AMP/images/6-1427200-4-1.jpg",
+      "alt": "Cable UTP AMP Cat 6 CMR 23AWG rollo 1000ft — vista frontal",
+      "role": "main"
+    },
+    {
+      "src": "https://www.ds3comunicaciones.com/AMP/images/Caja.jpg",
+      "alt": "Caja embalaje Cable UTP AMP Cat 6 CMR — reel-in-box",
+      "role": "box"
+    }
+  ],
+  "breadcrumb": [
+    { "label": "Inicio", "href": "/" },
+    { "label": "AMP", "href": "/marcas/amp" },
+    { "label": "Cable de red Cat 6", "href": "/marcas/amp#cablecat6" },
+    { "label": "6-1427200-4", "href": "/productos/amp/6-1427200-4" }
+  ],
+  "downloads": [
+    {
+      "label": "Datos Técnicos",
+      "url": "https://www.ds3comunicaciones.com/AMP/files/6-1427200-4-DS.pdf",
+      "type": "datasheet"
+    }
+  ],
+  "cable": {
+    "cableCategory": "cat6",
+    "jacket": "CMR",
+    "awg": 23,
+    "rollLength": 1000,
+    "rollUnit": "ft",
+    "pairs": 4,
+    "conductorType": "solido",
+    "nominalPropagationSpeed": "70%",
+    "voltage": "300 VAC o VDC",
+    "operatingTemp": "-20°C a 60°C",
+    "storageTemp": "-20°C a 80°C",
+    "color": ["blanco", "gris", "azul"],
+    "standards": [
+      "TIA/EIA-568-B.2-1",
+      "ISO/IEC 11801 Clase E",
+      "ANSI/UL 1666 (CMR)",
+      "IEC 332-1",
+      "NFPA 70 Artículo 800"
+    ],
+    "applications": [
+      "Gigabit Ethernet (1000BASE-TX)",
+      "10/100BASE-TX",
+      "Token Ring",
+      "ATM 155 Mbps",
+      "100 Mbps TPPMD",
+      "Video ISDN",
+      "VoIP (voz analógica y digital)"
+    ],
+    "partNumber": "X-1427200-X"
+  },
+  "keyFeatures": [
+    { "icon": "cable", "label": "Categoría", "value": "Cat 6 (Clase E)" },
+    { "icon": "shield-check", "label": "Chaqueta", "value": "CMR (Riser)" },
+    { "icon": "ruler", "label": "Calibre", "value": "23 AWG" },
+    { "icon": "package", "label": "Longitud", "value": "1000 ft por rollo" },
+    { "icon": "zap", "label": "Velocidad", "value": "Gigabit Ethernet" },
+    { "icon": "check-circle", "label": "Estándar", "value": "TIA/EIA-568-B.2-1" }
+  ],
+  "specTable": [
+    { "label": "Categoría de Cable", "value": "Categoría 6 / Clase E" },
+    { "label": "Chaqueta", "value": "CMR (Cable de distribución Riser)" },
+    { "label": "Calibre del conductor", "value": "23 AWG" },
+    { "label": "Pares", "value": "4 pares" },
+    { "label": "Tipo de conductor", "value": "Sólido" },
+    { "label": "Longitud del rollo", "value": "1000 ft (aprox. 305 m)" },
+    { "label": "Voltaje", "value": "300 VAC o VDC" },
+    { "label": "Velocidad nominal de propagación", "value": "70%" },
+    { "label": "Temperatura de operación", "value": "-20°C a 60°C" },
+    { "label": "Temperatura de almacenamiento", "value": "-20°C a 80°C" },
+    { "label": "Verificación de rendimiento", "value": "Caracterizado a 600 MHz" },
+    { "label": "Cumplimiento de inflamabilidad", "value": "ANSI/UL 1666, IEC 332-1 (CMR)" },
+    { "label": "Embalaje", "value": "Reel-in-box, libre de empalmes" },
+    { "label": "Número de parte", "value": "X-1427200-X (horizontal AMP NetConnect)" },
+    { "label": "Colores disponibles", "value": "Blanco, gris, azul" }
+  ],
+  "longDescription": "Los cables AMP NetConnect Categoría 6 exceden los requerimientos TIA/EIA-568-B.2-1 e ISO/IEC 11801 Clase E. Cumplen con todos los requisitos de rendimiento para aplicaciones actuales y futuras como Gigabit Ethernet (1000BASE-TX), 10/100BASE-TX, Token Ring, ATM 155 Mbps, 100 Mbps TPPMD, Video ISDN, y voz analógica y digital (VoIP). Los cables UTP Cat 6 AMP NetConnect están disponibles con chaqueta CMR en colores estándar (blanco, gris y azul). El embalaje es un reel-in-box con 1000 ft libre de empalmes longitudinales. El rendimiento del cable es verificado independientemente y caracterizado a 600 MHz. El cumplimiento de inflamabilidad satisface NEC Artículo 800 y NFPA 70, CMR (ANSI/UL 1666, IEC 332-1).",
+  "relatedProducts": [
+    "amp/1859345-2",
+    "amp/1427254-4",
+    "amp/219585-2",
+    "amp/1859218-2",
+    "amp/1859381-2"
+  ],
+  "seo": {
+    "title": "Cable UTP AMP Cat 6 CMR 23AWG 6-1427200-4 | Precio Perú | DS3 Comunicaciones",
+    "description": "Cable de red AMP NetConnect Categoría 6 con chaqueta CMR 23AWG, rollo de 1000 ft. Certificado TIA/EIA-568-B.2-1. Soporta Gigabit Ethernet y VoIP. Distribuidores en Perú.",
+    "keywords": [
+      "cable utp cat 6 amp",
+      "cable red cat6 peru",
+      "amp netconnect categoria 6",
+      "cable cmr 23awg",
+      "6-1427200-4",
+      "cable gigabit ethernet peru",
+      "cableado estructurado lima",
+      "cable categoria 6 rollo 1000ft"
+    ],
+    "schemaOrg": {
+      "name": "Cable UTP AMP NetConnect Categoría 6 Chaqueta CMR 23AWG 6-1427200-4",
+      "description": "Cable de red Cat 6 de 23 AWG con chaqueta CMR en rollo de 1000 ft. Excede TIA/EIA-568-B.2-1.",
+      "brand": "AMP",
+      "sku": "6-1427200-4",
+      "mpn": "6-1427200-4",
+      "offers": {
+        "price": 187.0,
+        "priceCurrency": "USD",
+        "availability": "InStock",
+        "seller": "DS3 Comunicaciones"
+      }
+    }
+  }
+}

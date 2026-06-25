@@ -1,0 +1,75 @@
+{
+  "slug": "amp/1427254-4",
+  "sku": "1427254-4",
+  "name": "Cable UTP AMP Categoría 6 Chaqueta CM",
+  "shortDescription": "Cable Cat 6 con chaqueta CM para uso general en espacios horizontales. Rollo de 1000 ft.",
+  "brand": "AMP",
+  "category": "cable-utp",
+  "price": {
+    "amount": 0,
+    "currency": "USD",
+    "includesIGV": false,
+    "unit": "rollo"
+  },
+  "inStock": true,
+  "images": [
+    {
+      "src": "https://www.ds3comunicaciones.com/AMP/images/1427254-4-1.jpg",
+      "alt": "Cable UTP AMP Cat 6 CM 1427254-4",
+      "role": "main"
+    }
+  ],
+  "breadcrumb": [
+    { "label": "Inicio", "href": "/" },
+    { "label": "AMP", "href": "/marcas/amp" },
+    { "label": "Cable Cat 6", "href": "/marcas/amp#cablecat6" },
+    { "label": "1427254-4", "href": "/productos/amp/1427254-4" }
+  ],
+  "cable": {
+    "cableCategory": "cat6",
+    "jacket": "CM",
+    "awg": 23,
+    "rollLength": 1000,
+    "rollUnit": "ft",
+    "pairs": 4,
+    "conductorType": "solido",
+    "nominalPropagationSpeed": "70%",
+    "voltage": "300 VAC o VDC",
+    "operatingTemp": "-20°C a 60°C",
+    "storageTemp": "-20°C a 80°C",
+    "standards": ["TIA/EIA-568-B.2-1"],
+    "applications": ["Gigabit Ethernet", "10/100BASE-TX", "VoIP"]
+  },
+  "keyFeatures": [
+    { "icon": "cable", "label": "Categoría", "value": "Cat 6" },
+    { "icon": "shield-check", "label": "Chaqueta", "value": "CM" },
+    { "icon": "ruler", "label": "Calibre", "value": "23 AWG" },
+    { "icon": "package", "label": "Longitud", "value": "1000 ft" }
+  ],
+  "specTable": [
+    { "label": "Categoría", "value": "Cat 6 / Clase E" },
+    { "label": "Chaqueta", "value": "CM (Communications Multipurpose)" },
+    { "label": "Calibre", "value": "23 AWG" },
+    { "label": "Longitud", "value": "1000 ft" }
+  ],
+  "longDescription": "Cable UTP AMP Categoría 6 con chaqueta CM para instalaciones horizontales estándar.",
+  "relatedProducts": ["amp/6-1427200-4", "amp/1859345-2"],
+  "seo": {
+    "title": "Cable UTP AMP Cat 6 CM 1427254-4 | DS3 Comunicaciones Perú",
+    "description": "Cable AMP Cat 6 chaqueta CM, rollo 1000 ft. Lima, Perú.",
+    "keywords": ["cable cat 6 cm amp", "1427254-4", "cableado estructurado"],
+    "schemaOrg": {
+      "name": "Cable UTP AMP Categoría 6 Chaqueta CM 1427254-4",
+      "description": "Cable Cat 6 CM 23 AWG rollo 1000 ft.",
+      "brand": "AMP",
+      "sku": "1427254-4",
+      "mpn": "1427254-4",
+      "offers": {
+        "price": 0,
+        "priceCurrency": "USD",
+        "availability": "InStock",
+        "seller": "DS3 Comunicaciones"
+      }
+    }
+  }
+}

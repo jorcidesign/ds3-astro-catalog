@@ -1,0 +1,46 @@
+---
+import type { ProductData } from '../types';
+import ProductCard from './ProductCard.astro';
+
+interface Props {
+  products: ProductData[];
+  title?: string;
+}
+
+const { products, title = 'También disponible' } = Astro.props;
+---
+
+{products.length > 0 && (
+  <section class="related-products">
+    <h2 class="section-title">{title}</h2>
+    <div class="related-grid">
+      {products.map((p) => (
+        <ProductCard product={p} />
+      ))}
+    </div>
+  </section>
+)}
+
+<style>
+  .related-products {
+    margin: 3rem 0;
+    padding-top: 2rem;
+    border-top: 1px solid #e5e7eb;
+  }
+
+  .section-title {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: #111827;
+    margin: 0 0 1.5rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 2px solid #3b82f6;
+    display: inline-block;
+  }
+
+  .related-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    gap: 1.5rem;
+  }
+</style>
