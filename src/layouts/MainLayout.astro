@@ -1,19 +1,25 @@
 ---
-import type { SiteData, ProductData, BreadcrumbItem } from '../types';
+import type { SiteData, BreadcrumbItem } from '../types';
 import Header from '../astro-components/Header.astro';
 import Footer from '../astro-components/Footer.astro';
+import BrandNav from '../astro-components/BrandNav.astro';
+import BottomBar from '../astro-components/BottomBar.astro';
+import TrustStrip from '../astro-components/TrustStrip.astro';
+import TrustBar from '../astro-components/TrustBar.astro';
+import Toast from '../astro-components/Toast.astro';
 import '../styles/main.scss';
 
 export interface Props {
   title: string;
   description?: string;
   site: SiteData;
-  seo?: ProductData['seo'];
-  breadcrumb?: ProductData['breadcrumb'];
+  showBrandNav?: boolean;
+  showTrustStrip?: boolean;
+  breadcrumb?: BreadcrumbItem[];
   currentPath?: string;
 }
 
-const { title, description, site, seo, breadcrumb, currentPath } = Astro.props;
+const { title, description, site, showBrandNav = true, showTrustStrip = true, currentPath } = Astro.props;
 ---
 
 <!doctype html>
@@ -31,38 +37,20 @@ const { title, description, site, seo, breadcrumb, currentPath } = Astro.props;
       href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Poppins:wght@600;700;800&display=swap"
       rel="stylesheet"
     />
-
-    {seo?.keywords && (
-      <meta name="keywords" content={seo.keywords.join(', ')} />
-    )}
-
-    {seo?.schemaOrg && (
-      <script is:inline type="application/ld+json" set:html={JSON.stringify({
-        '@context': 'https://schema.org',
-        '@type': 'Product',
-        ...seo.schemaOrg,
-      })} />
-    )}
-
-    {breadcrumb && (
-      <script is:inline type="application/ld+json" set:html={JSON.stringify({
-        '@context': 'https://schema.org',
-        '@type': 'BreadcrumbList',
-        itemListElement: breadcrumb.map((item: BreadcrumbItem, i: number) => ({
-          '@type': 'ListItem',
-          position: i + 1,
-          name: item.label,
-          item: `${site.siteUrl}${import.meta.env.BASE_URL}${item.href.replace(/^\//, '')}`,
-        })),
-      })} />
-    )}
   </head>
   <body>
     <Header site={site} currentPath={currentPath} />
+    {showBrandNav && <BrandNav brands={site.brands} />}
+    {showTrustStrip && <TrustStrip />}
+    
     <main class="main-content">
       <slot />
     </main>
+    
+    <TrustBar />
     <Footer site={site} />
+    <BottomBar whatsappNumber={site.contact.whatsapp} />
+    <Toast />
   </body>
 </html>
 
@@ -71,6 +59,12 @@ const { title, description, site, seo, breadcrumb, currentPath } = Astro.props;
     min-height: 60vh;
     max-width: var(--container-max);
     margin: 0 auto;
-    padding: 1rem;
+    padding: var(--sp-6) var(--gutter);
+  }
+
+  @media (max-width: 767px) {
+    .main-content {
+      padding-bottom: calc(var(--bottom-bar-h) + var(--sp-6));
+    }
   }
 </style>

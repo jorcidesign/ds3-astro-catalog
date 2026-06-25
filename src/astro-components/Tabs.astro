@@ -1,0 +1,72 @@
+<div class="tabs" role="tablist" aria-label="Información del producto">
+  <div class="tabs-nav">
+    <button class="tab-btn is-active" role="tab" aria-selected="true" aria-controls="panel-desc" id="tab-desc">Descripción</button>
+    <button class="tab-btn" role="tab" aria-selected="false" aria-controls="panel-specs" id="tab-specs">Especificaciones</button>
+    <button class="tab-btn" role="tab" aria-selected="false" aria-controls="panel-downloads" id="tab-downloads">Descargas</button>
+  </div>
+  
+  <div class="tab-panels">
+    <div class="tab-panel is-active" id="panel-desc" role="tabpanel" aria-labelledby="tab-desc" tabindex="0">
+      <slot name="tab-desc" />
+    </div>
+    <div class="tab-panel" id="panel-specs" role="tabpanel" aria-labelledby="tab-specs" tabindex="0">
+      <slot name="tab-specs" />
+    </div>
+    <div class="tab-panel" id="panel-downloads" role="tabpanel" aria-labelledby="tab-downloads" tabindex="0">
+      <slot name="tab-downloads" />
+    </div>
+  </div>
+</div>
+
+<style>
+.tabs { margin: var(--sp-6) 0; }
+.tabs-nav { display: flex; gap: var(--sp-1); border-bottom: 2px solid var(--border); margin-bottom: var(--sp-6); }
+.tab-btn {
+  padding: var(--sp-3) var(--sp-5);
+  border: none;
+  background: none;
+  font-size: var(--text-sm);
+  font-weight: var(--fw-medium);
+  color: var(--text-mid);
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -2px;
+  transition: var(--t-color);
+  border-radius: var(--radius-sm) var(--radius-sm) 0 0;
+}
+.tab-btn:hover { color: var(--text-hi); background: var(--clr-n-50); }
+.tab-btn:focus-visible { outline: var(--ring-focus); outline-offset: -2px; }
+.tab-btn.is-active { color: var(--text-brand); border-bottom-color: var(--clr-p-500); font-weight: var(--fw-semibold); }
+.tab-panel { display: none; }
+.tab-panel.is-active { display: block; }
+.tab-panel:focus { outline: none; }
+</style>
+
+<script>
+document.querySelectorAll('.tabs').forEach(tabs => {
+  const btns = tabs.querySelectorAll('.tab-btn');
+  const panels = tabs.querySelectorAll('.tab-panel');
+  
+  btns.forEach(btn => {
+    btn.addEventListener('click', () => {
+      const target = btn.getAttribute('aria-controls');
+      btns.forEach(b => { b.classList.remove('is-active'); b.setAttribute('aria-selected', 'false'); });
+      panels.forEach(p => p.classList.remove('is-active'));
+      btn.classList.add('is-active');
+      btn.setAttribute('aria-selected', 'true');
+      tabs.querySelector(`#${target}`)?.classList.add('is-active');
+    });
+  });
+  
+  btns.forEach((btn, i) => {
+    btn.addEventListener('keydown', (e) => {
+      const key = (e as KeyboardEvent).key;
+      const list = [...btns] as HTMLButtonElement[];
+      if (key === 'ArrowRight') { e.preventDefault(); list[(i+1) % list.length]?.focus(); }
+      if (key === 'ArrowLeft') { e.preventDefault(); list[(i-1+list.length) % list.length]?.focus(); }
+      if (key === 'Home') { e.preventDefault(); list[0]?.focus(); }
+      if (key === 'End') { e.preventDefault(); list[list.length-1]?.focus(); }
+    });
+  });
+});
+</script>

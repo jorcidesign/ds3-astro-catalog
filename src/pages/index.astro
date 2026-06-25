@@ -1,7 +1,9 @@
 ---
 import MainLayout from '../layouts/MainLayout.astro';
+import ProductCard from '../astro-components/ProductCard.astro';
+import TrustBar from '../astro-components/TrustBar.astro';
 import { getEntry, getCollection } from 'astro:content';
-import type { BrandEntry, ProductEntry, ProductImage } from '../types';
+import type { BrandEntry, ProductEntry } from '../types';
 
 const site = await getEntry('site', 'config');
 const products = await getCollection('products');
@@ -15,157 +17,112 @@ const featuredProducts = products.slice(0, 3);
   currentPath="/"
 >
   <section class="hero">
-    <h1 class="hero-title">{site.data.siteName}</h1>
-    <p class="hero-tagline">{site.data.tagline}</p>
-  </section>
-
-  <section class="brands-section">
-    <h2 class="section-title">Nuestras marcas</h2>
-    <div class="brand-grid">
-      {site.data.brands.map((brand: BrandEntry) => (
-        <a href={brand.href} class="brand-card">
-          <img src={brand.logo} alt={brand.name} loading="lazy" />
-          <span class="brand-name">{brand.name}</span>
-        </a>
-      ))}
+    <div class="container">
+      <h1 class="hero-title">{site.data.siteName}</h1>
+      <p class="hero-tagline">{site.data.tagline}</p>
     </div>
   </section>
 
-  {featuredProducts.length > 0 && (
-    <section class="featured-section">
+  <section class="brands-section section">
+    <div class="container">
+      <h2 class="section-title">Nuestras marcas</h2>
+      <div class="brand-grid">
+        {site.data.brands.map((b: BrandEntry) => (
+          <a href={b.href} class="brand-card">
+            <img src={b.logo} alt={b.name} loading="lazy" />
+            <span class="brand-name">{b.name}</span>
+          </a>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <TrustBar />
+
+  <section class="featured-section section">
+    <div class="container">
       <h2 class="section-title">Productos destacados</h2>
       <div class="product-grid">
-        {featuredProducts.map((p: ProductEntry) => {
-          const mainImg: ProductImage | undefined = p.data.images.find((i: ProductImage) => i.role === 'main');
-          const brandSlug = p.data.brand.toLowerCase();
-          return (
-            <a href={`/productos/${brandSlug}/${p.data.slug.split('/').pop()}`} class="featured-card">
-              {mainImg && <img src={mainImg.src} alt={mainImg.alt} class="featured-img" />}
-              <div class="featured-body">
-                <h3>{p.data.name}</h3>
-                <span class="featured-price">
-                  {p.data.price.amount > 0 ? `$${p.data.price.amount.toFixed(2)}` : 'Consultar precio'}
-                </span>
-              </div>
-            </a>
-          );
-        })}
+        {featuredProducts.map((p: ProductEntry) => (
+          <ProductCard product={p.data} />
+        ))}
       </div>
-    </section>
-  )}
+    </div>
+  </section>
 </MainLayout>
 
 <style>
   .hero {
     text-align: center;
-    padding: 4rem 1rem 3rem;
+    padding: var(--sp-12) 0 var(--sp-8);
   }
 
   .hero-title {
-    font-size: 2.5rem;
-    font-weight: 800;
-    color: #1a1a2e;
-    margin: 0 0 1rem;
+    font-size: var(--text-4xl);
+    font-weight: var(--fw-extrabold);
+    color: var(--text-hi);
+    margin: 0 0 var(--sp-3);
   }
 
   .hero-tagline {
-    font-size: 1.125rem;
-    color: #6b7280;
-    max-width: 600px;
+    font-size: var(--text-lg);
+    color: var(--text-mid);
+    max-width: 560px;
     margin: 0 auto;
-    line-height: 1.6;
+    line-height: var(--lh-relaxed);
+  }
+
+  .section {
+    padding: var(--sp-8) 0;
   }
 
   .section-title {
-    font-size: 1.5rem;
-    font-weight: 700;
-    color: #111827;
-    margin: 0 0 1.5rem;
-    padding-bottom: 0.5rem;
-    border-bottom: 3px solid #3b82f6;
-    display: inline-block;
-  }
-
-  .brands-section,
-  .featured-section {
-    padding: 2rem 1rem;
+    font-size: var(--text-2xl);
+    font-weight: var(--fw-bold);
+    color: var(--text-hi);
+    margin: 0 0 var(--sp-6);
   }
 
   .brand-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
-    gap: 1rem;
-    align-items: center;
+    gap: var(--sp-4);
   }
 
   .brand-card {
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 0.5rem;
-    padding: 1.25rem;
-    border: 1px solid #e5e7eb;
-    border-radius: 8px;
+    gap: var(--sp-2);
+    padding: var(--sp-5);
+    background: var(--surface-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
     text-decoration: none;
     color: inherit;
-    transition: box-shadow 0.2s;
+    transition: var(--t-shadow), var(--t-transform);
   }
 
   .brand-card:hover {
-    box-shadow: 0 4px 12px rgba(0,0,0,0.06);
+    box-shadow: var(--shadow-md);
+    transform: translateY(-2px);
   }
 
   .brand-card img {
     max-height: 32px;
     width: auto;
+    object-fit: contain;
   }
 
   .brand-name {
-    font-size: 0.8rem;
-    font-weight: 600;
-    color: #374151;
+    font-size: var(--text-sm);
+    font-weight: var(--fw-semibold);
+    color: var(--text-mid);
   }
 
   .product-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-    gap: 1.5rem;
-  }
-
-  .featured-card {
-    display: block;
-    border: 1px solid #e5e7eb;
-    border-radius: 8px;
-    overflow: hidden;
-    text-decoration: none;
-    color: inherit;
-    transition: box-shadow 0.2s;
-  }
-
-  .featured-card:hover {
-    box-shadow: 0 4px 16px rgba(0,0,0,0.08);
-  }
-
-  .featured-img {
-    width: 100%;
-    aspect-ratio: 4 / 3;
-    object-fit: contain;
-    padding: 1.5rem;
-    background: #f8f9fa;
-  }
-
-  .featured-body {
-    padding: 1rem;
-  }
-
-  .featured-body h3 {
-    font-size: 0.95rem;
-    font-weight: 600;
-    margin: 0 0 0.5rem;
-  }
-
-  .featured-price {
-    font-weight: 700;
-    color: #059669;
+    gap: var(--sp-5);
   }
 </style>

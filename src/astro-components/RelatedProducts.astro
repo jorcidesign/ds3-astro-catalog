@@ -23,24 +23,22 @@ const { products, title = 'También disponible' } = Astro.props;
 
 <style>
   .related-products {
-    margin: 3rem 0;
-    padding-top: 2rem;
-    border-top: 1px solid #e5e7eb;
+    margin: var(--sp-12) 0;
   }
 
   .section-title {
-    font-size: 1.25rem;
-    font-weight: 700;
-    color: #111827;
-    margin: 0 0 1.5rem;
-    padding-bottom: 0.5rem;
-    border-bottom: 2px solid #3b82f6;
+    font-size: var(--text-xl);
+    font-weight: var(--fw-bold);
+    color: var(--text-hi);
+    margin-bottom: var(--sp-6);
+    padding-bottom: var(--sp-3);
+    border-bottom: 2px solid var(--border-brand);
     display: inline-block;
   }
 
   .related-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
-    gap: 1.5rem;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: var(--sp-5);
   }
 </style>

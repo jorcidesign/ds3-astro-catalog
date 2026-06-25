@@ -8,74 +8,60 @@ interface Props {
 const { specTable } = Astro.props;
 ---
 
-<section class="specs">
-  <h2 class="section-title">Especificaciones técnicas</h2>
-  <div class="specs-table-wrapper">
-    <table class="specs-table">
-      <tbody>
-        {specTable.map((row: SpecRow, i: number) => (
-          <tr class={i % 2 === 0 ? 'even' : 'odd'}>
-            <th scope="row">{row.label}</th>
-            <td>{row.value}</td>
-          </tr>
-        ))}
-      </tbody>
-    </table>
+<section class="spec-table" aria-label="Especificaciones técnicas">
+  <div class="spec-table-inner">
+    {specTable.map((row: SpecRow, i: number) => (
+      <div class={`spec-row ${i % 2 === 0 ? 'even' : ''}`}>
+        <span class="spec-label">{row.label}</span>
+        <span class="spec-value">{row.value}</span>
+      </div>
+    ))}
   </div>
 </section>
 
 <style>
-  .specs {
-    margin: 2rem 0;
+  .spec-table {
+    background: var(--surface-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
   }
 
-  .section-title {
-    font-size: 1.25rem;
-    font-weight: 700;
-    color: #111827;
-    margin: 0 0 1rem;
-    padding-bottom: 0.5rem;
-    border-bottom: 2px solid #3b82f6;
-    display: inline-block;
+  .spec-table-inner {
+    display: grid;
   }
 
-  .specs-table-wrapper {
-    overflow-x: auto;
-    border: 1px solid #e5e7eb;
-    border-radius: 8px;
+  .spec-row {
+    display: grid;
+    grid-template-columns: 40% 1fr;
+    gap: var(--sp-4);
+    padding: var(--sp-3) var(--sp-4);
+    border-bottom: 1px solid var(--border);
   }
 
-  .specs-table {
-    width: 100%;
-    border-collapse: collapse;
-    font-size: 0.875rem;
-  }
-
-  .specs-table th,
-  .specs-table td {
-    padding: 0.75rem 1rem;
-    text-align: left;
-    border-bottom: 1px solid #e5e7eb;
-  }
-
-  .specs-table tr:last-child th,
-  .specs-table tr:last-child td {
+  .spec-row:last-child {
     border-bottom: none;
   }
 
-  .specs-table th {
-    width: 40%;
-    font-weight: 600;
-    color: #374151;
-    background: #f9fafb;
+  .spec-row.even {
+    background: var(--clr-n-50);
   }
 
-  .specs-table td {
-    color: #6b7280;
+  .spec-label {
+    font-size: var(--text-sm);
+    font-weight: var(--fw-semibold);
+    color: var(--text-mid);
   }
 
-  .specs-table tr.even th,
-  .specs-table tr.even td {
-    background: #f9fafb;
+  .spec-value {
+    font-size: var(--text-sm);
+    color: var(--text-hi);
+  }
+
+  @media (max-width: 480px) {
+    .spec-row {
+      grid-template-columns: 1fr;
+      gap: var(--sp-1);
+    }
   }
 </style>

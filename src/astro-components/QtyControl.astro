@@ -1,0 +1,136 @@
+---
+interface Props {
+  price: number;
+  currency?: string;
+}
+
+const { price } = Astro.props;
+const priceAmount = price;
+---
+
+<div class="qty-control" data-price={priceAmount}>
+  <label class="qty-label" for="qty-input">Cantidad:</label>
+  <div class="qty-adjuster">
+    <button class="qty-btn qty-btn--minus" aria-label="Disminuir cantidad" disabled>-</button>
+    <input type="number" id="qty-input" class="qty-input" value="1" min="1" max="99" aria-label="Cantidad" />
+    <button class="qty-btn qty-btn--plus" aria-label="Aumentar cantidad">+</button>
+  </div>
+  <span class="qty-total" aria-live="polite"></span>
+</div>
+
+<style>
+  .qty-control {
+    display: flex;
+    align-items: center;
+    gap: var(--sp-4);
+  }
+
+  .qty-label {
+    font-size: var(--text-sm);
+    font-weight: var(--fw-medium);
+    color: var(--text-mid);
+  }
+
+  .qty-adjuster {
+    display: flex;
+    align-items: center;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    overflow: hidden;
+  }
+
+  .qty-btn {
+    width: 40px;
+    height: 40px;
+    border: none;
+    background: var(--clr-n-50);
+    color: var(--text-hi);
+    font-size: var(--text-lg);
+    cursor: pointer;
+    transition: var(--t-color);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .qty-btn:hover:not(:disabled) {
+    background: var(--clr-n-100);
+  }
+
+  .qty-btn:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+  }
+
+  .qty-input {
+    width: 52px;
+    height: 40px;
+    border: none;
+    border-left: 1px solid var(--border);
+    border-right: 1px solid var(--border);
+    text-align: center;
+    font-size: var(--text-base);
+    font-weight: var(--fw-semibold);
+    color: var(--text-hi);
+    -moz-appearance: textfield;
+    background: var(--clr-n-0);
+  }
+
+  .qty-input::-webkit-outer-spin-button,
+  .qty-input::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+  }
+
+  .qty-total {
+    font-size: var(--text-sm);
+    color: var(--text-mid);
+  }
+</style>
+
+<script>
+  document.querySelectorAll('.qty-control').forEach(ctrl => {
+    const input = ctrl.querySelector('.qty-input') as HTMLInputElement;
+    const minusBtn = ctrl.querySelector('.qty-btn--minus') as HTMLButtonElement;
+    const plusBtn = ctrl.querySelector('.qty-btn--plus') as HTMLButtonElement;
+    const totalEl = ctrl.querySelector('.qty-total') as HTMLElement;
+    const unitPrice = parseFloat((ctrl as HTMLElement).dataset.price || '0');
+
+    function update() {
+      const qty = parseInt(input.value) || 1;
+      minusBtn.disabled = qty <= 1;
+      plusBtn.disabled = qty >= 99;
+      if (totalEl && unitPrice > 0) {
+        const total = (unitPrice * qty).toFixed(2);
+        totalEl.textContent = `Total: $${total}`;
+      }
+    }
+
+    minusBtn.addEventListener('click', () => {
+      input.value = String(Math.max(1, parseInt(input.value) - 1));
+      update();
+    });
+
+    plusBtn.addEventListener('click', () => {
+      input.value = String(Math.min(99, parseInt(input.value) + 1));
+      update();
+    });
+
+    input.addEventListener('change', () => {
+      input.value = String(Math.max(1, Math.min(99, parseInt(input.value) || 1)));
+      update();
+    });
+
+    input.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowUp') {
+        e.preventDefault();
+        plusBtn.click();
+      }
+      if (e.key === 'ArrowDown') {
+        e.preventDefault();
+        minusBtn.click();
+      }
+    });
+
+    update();
+  });
+</script>

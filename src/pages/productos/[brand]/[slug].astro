@@ -4,6 +4,10 @@ import ProductGallery from '../../../astro-components/ProductGallery.astro';
 import ProductKeyFeatures from '../../../astro-components/ProductKeyFeatures.astro';
 import ProductSpecs from '../../../astro-components/ProductSpecs.astro';
 import RelatedProducts from '../../../astro-components/RelatedProducts.astro';
+import QtyControl from '../../../astro-components/QtyControl.astro';
+import CTAStack from '../../../astro-components/CTAStack.astro';
+import Tabs from '../../../astro-components/Tabs.astro';
+import FAQ from '../../../astro-components/FAQ.astro';
 import { getCollection, getEntry } from 'astro:content';
 import type { ProductEntry, BreadcrumbItem } from '../../../types';
 
@@ -22,45 +26,42 @@ const { entryId } = Astro.props;
 const product = await getEntry('products', entryId);
 const site = await getEntry('site', 'config');
 
-if (!product) {
-  return Astro.redirect('/404');
-}
+if (!product) return Astro.redirect('/404');
 
 const p = product.data;
-const brandSlug = p.brand.toLowerCase();
 const canonicalSlug = p.slug.split('/').pop();
 
-// Load related products
 let relatedEntries: typeof product[] = [];
-if (p.relatedProducts && p.relatedProducts.length > 0) {
-  relatedEntries = (await Promise.all(
-    p.relatedProducts.map((slug: string) => getEntry('products', slug))
-  )).filter((e): e is NonNullable<typeof e> => e !== undefined);
+if (p.relatedProducts?.length) {
+  relatedEntries = (await Promise.all(p.relatedProducts.map((s: string) => getEntry('products', s)))).filter(Boolean) as typeof relatedEntries;
 }
+
+const watxt = `Hola, me interesa el producto ${p.name} (SKU: ${p.sku})`;
+const datasheetUrl = p.downloads?.find((d: { type: string }) => d.type === 'datasheet')?.url;
 ---
 
 <MainLayout
   title={`${p.name} | ${p.brand}`}
   description={p.shortDescription}
   site={site.data}
-  seo={p.seo}
   breadcrumb={p.breadcrumb}
-  currentPath={`/productos/${brandSlug}/${canonicalSlug}`}
+  currentPath={`/productos/${p.brand.toLowerCase()}/${canonicalSlug}`}
 >
   <nav class="breadcrumb" aria-label="Breadcrumb">
-    {p.breadcrumb.map((crumb: BreadcrumbItem, i: number) => (
-      <span class="crumb">
-        {i > 0 && <span class="separator" aria-hidden="true">/</span>}
-        {i < p.breadcrumb.length - 1 ? (
-          <a href={crumb.href}>{crumb.label}</a>
-        ) : (
-          <span aria-current="page">{crumb.label}</span>
-        )}
-      </span>
-    ))}
+    <div class="container">
+      {p.breadcrumb.map((crumb: BreadcrumbItem, i: number) => (
+        <span class="crumb">
+          {i > 0 && <span class="separator" aria-hidden="true">/</span>}
+          {i < p.breadcrumb.length - 1
+            ? <a href={crumb.href}>{crumb.label}</a>
+            : <span aria-current="page">{crumb.label}</span>
+          }
+        </span>
+      ))}
+    </div>
   </nav>
 
-  <div class="product-layout">
+  <div class="product-layout container">
     <div class="product-gallery-col">
       <ProductGallery images={p.images} productName={p.name} />
     </div>
@@ -72,230 +73,252 @@ if (p.relatedProducts && p.relatedProducts.length > 0) {
         <p class="product-sku">SKU: {p.sku}</p>
       </div>
 
-      <div class="product-price-block">
+      <p class="product-desc">{p.shortDescription}</p>
+
+      <div class="price-block">
         {p.price.amount > 0 ? (
           <>
             <span class="price-amount">${p.price.amount.toFixed(2)}</span>
             <span class="price-unit">/ {p.price.unit}</span>
-            <span class="price-currency">{p.price.currency}</span>
-            {!p.price.includesIGV && (
-              <span class="price-tax">+ IGV</span>
-            )}
+            {!p.price.includesIGV && <span class="price-tax">+ IGV</span>}
           </>
         ) : (
           <span class="price-consult">Consultar precio</span>
         )}
-        <span class={`stock-badge ${p.inStock ? 'in-stock' : 'out-of-stock'}`}>
+        <span class={`badge ${p.inStock ? 'badge--success' : 'badge--danger'}`}>
           {p.inStock ? 'En stock' : 'Sin stock'}
         </span>
       </div>
 
-      <p class="product-description">{p.shortDescription}</p>
+      {p.keyFeatures?.length && <ProductKeyFeatures features={p.keyFeatures} />}
+
+      {p.inStock && p.price.amount > 0 && (
+        <QtyControl price={p.price.amount} />
+      )}
+
+      <CTAStack
+        whatsapp={site.data.contact.whatsapp}
+        whatsappText={watxt}
+        datasheetUrl={datasheetUrl}
+      />
     </div>
   </div>
 
-  {p.keyFeatures && p.keyFeatures.length > 0 && (
-    <ProductKeyFeatures features={p.keyFeatures} />
+  <div class="product-tabs-section container">
+    <Tabs>
+      <Fragment slot="tab-desc">
+        {p.longDescription?.split('\n').map((para: string) => para.trim() ? <p>{para.trim()}</p> : null)}
+      </Fragment>
+
+      <Fragment slot="tab-specs">
+        {p.specTable?.length && <ProductSpecs specTable={p.specTable} />}
+      </Fragment>
+
+      <Fragment slot="tab-downloads">
+        {p.downloads?.length && (
+          <div class="downloads-grid">
+            {p.downloads.map((dl: { label: string; url: string }) => (
+              <a href={dl.url} target="_blank" rel="noopener" class="download-item">
+                <svg class="dl-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                  <path d="M12 15V3m0 12l-4-4m4 4l4-4M2 17l.621 2.485A2 2 0 004.561 21h14.878a2 2 0 001.94-1.515L22 17"/>
+                </svg>
+                <span>{dl.label}</span>
+              </a>
+            ))}
+          </div>
+        )}
+      </Fragment>
+    </Tabs>
+  </div>
+
+  {p.cable && (
+    <div class="container">
+      <FAQ items={[
+        { question: '¿Cuál es la longitud del rollo?', answer: `${p.cable.rollLength} ${p.cable.rollUnit}` },
+        { question: '¿Qué tipo de chaqueta tiene?', answer: p.cable.jacket },
+        { question: '¿Para qué aplicaciones es recomendado?', answer: p.cable.applications.join(', ') },
+      ]} />
+    </div>
   )}
 
-  {p.longDescription && (
-    <section class="long-description">
-      <h2 class="section-title">Descripción</h2>
-      <div class="desc-content">
-        {p.longDescription.split('\n').map((para: string) => (
-          para.trim() ? <p>{para.trim()}</p> : null
-        ))}
-      </div>
-    </section>
-  )}
-
-  {p.specTable && p.specTable.length > 0 && (
-    <ProductSpecs specTable={p.specTable} />
-  )}
-
-  {p.downloads && p.downloads.length > 0 && (
-    <section class="downloads">
-      <h2 class="section-title">Descargas</h2>
-      <div class="downloads-list">
-        {p.downloads.map((dl: { label: string; url: string; type: string }) => (
-          <a href={dl.url} target="_blank" rel="noopener" class="download-link">
-            📄 {dl.label}
-          </a>
-        ))}
-      </div>
-    </section>
-  )}
-
-  <RelatedProducts
-    products={relatedEntries.map((e) => e.data)}
-    title="También disponible"
-  />
+  <RelatedProducts products={relatedEntries.map(e => e.data)} title="Productos relacionados" />
 </MainLayout>
 
 <style>
   .breadcrumb {
-    font-size: 0.8rem;
-    color: #6b7280;
-    margin-bottom: 1.5rem;
-    padding: 0.5rem 0;
+    padding: var(--sp-4) 0;
+    font-size: var(--text-sm);
+    color: var(--text-mid);
+  }
+
+  .breadcrumb .container {
+    display: flex;
+    align-items: center;
+    gap: var(--sp-2);
+    flex-wrap: wrap;
+  }
+
+  .crumb {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--sp-2);
   }
 
   .crumb a {
-    color: #3b82f6;
-    text-decoration: none;
+    color: var(--text-link);
   }
 
   .crumb a:hover {
-    text-decoration: underline;
+    color: var(--text-link-hov);
   }
 
   .separator {
-    margin: 0 0.5rem;
-    color: #d1d5db;
+    color: var(--border-strong);
   }
 
   .product-layout {
     display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 2rem;
-    margin-bottom: 2rem;
+    grid-template-columns: 1fr var(--product-aside-w);
+    gap: var(--sp-8);
+    margin-bottom: var(--sp-8);
+    align-items: start;
   }
 
-  @media (max-width: 768px) {
+  @media (max-width: 1024px) {
     .product-layout {
       grid-template-columns: 1fr;
     }
   }
 
+  .product-gallery-col {
+    position: sticky;
+    top: calc(var(--header-h) + var(--sp-4));
+  }
+
+  @media (max-width: 1024px) {
+    .product-gallery-col {
+      position: static;
+    }
+  }
+
+  .product-header {
+    margin-bottom: var(--sp-4);
+  }
+
   .product-brand {
-    display: inline-block;
-    font-size: 0.8rem;
-    font-weight: 700;
-    color: #3b82f6;
+    font-size: var(--text-xs);
+    font-weight: var(--fw-semibold);
+    color: var(--text-brand);
     text-transform: uppercase;
-    letter-spacing: 0.05em;
-    margin-bottom: 0.5rem;
+    letter-spacing: var(--ls-widest);
   }
 
   .product-title {
-    font-size: 1.5rem;
-    font-weight: 700;
-    color: #111827;
-    margin: 0 0 0.5rem;
-    line-height: 1.3;
+    font-size: var(--text-2xl);
+    font-weight: var(--fw-bold);
+    color: var(--text-hi);
+    margin: var(--sp-1) 0 var(--sp-2);
+    line-height: var(--lh-tight);
   }
 
   .product-sku {
-    font-size: 0.85rem;
-    color: #9ca3af;
-    margin: 0 0 1.5rem;
+    font-size: var(--text-sm);
+    color: var(--text-low);
+    margin: 0;
   }
 
-  .product-price-block {
+  .product-desc {
+    font-size: var(--text-base);
+    color: var(--text-mid);
+    line-height: var(--lh-relaxed);
+    margin: 0 0 var(--sp-5);
+  }
+
+  .price-block {
     display: flex;
     flex-wrap: wrap;
     align-items: baseline;
-    gap: 0.5rem;
-    margin-bottom: 1.5rem;
+    gap: var(--sp-3);
+    margin-bottom: var(--sp-6);
   }
 
   .price-amount {
-    font-size: 2rem;
-    font-weight: 800;
-    color: #059669;
+    font-size: var(--text-3xl);
+    font-weight: var(--fw-extrabold);
+    color: var(--clr-success-text);
+    font-family: var(--font-display);
   }
 
   .price-unit {
-    font-size: 0.9rem;
-    color: #6b7280;
-  }
-
-  .price-currency {
-    font-size: 0.9rem;
-    color: #6b7280;
+    font-size: var(--text-base);
+    color: var(--text-mid);
   }
 
   .price-tax {
-    font-size: 0.8rem;
-    color: #ef4444;
-    font-weight: 600;
+    font-size: var(--text-sm);
+    color: var(--clr-error-text);
+    font-weight: var(--fw-semibold);
   }
 
   .price-consult {
-    font-size: 1.125rem;
-    font-weight: 600;
-    color: #3b82f6;
+    font-size: var(--text-xl);
+    font-weight: var(--fw-semibold);
+    color: var(--text-brand);
   }
 
-  .stock-badge {
-    display: inline-block;
-    padding: 0.25rem 0.75rem;
-    border-radius: 999px;
-    font-size: 0.8rem;
-    font-weight: 600;
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    padding: var(--sp-1) var(--sp-3);
+    border-radius: var(--radius-full);
+    font-size: var(--text-xs);
+    font-weight: var(--fw-semibold);
   }
 
-  .in-stock {
-    background: #d1fae5;
-    color: #065f46;
+  .badge--success {
+    background: var(--clr-success-bg);
+    color: var(--clr-success-text);
   }
 
-  .out-of-stock {
-    background: #fee2e2;
-    color: #991b1b;
+  .badge--danger {
+    background: var(--clr-error-bg);
+    color: var(--clr-error-text);
   }
 
-  .product-description {
-    font-size: 0.95rem;
-    color: #4b5563;
-    line-height: 1.7;
+  .product-tabs-section {
+    margin: var(--sp-8) 0;
   }
 
-  .section-title {
-    font-size: 1.25rem;
-    font-weight: 700;
-    color: #111827;
-    margin: 0 0 1rem;
-    padding-bottom: 0.5rem;
-    border-bottom: 2px solid #3b82f6;
-    display: inline-block;
+  .downloads-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: var(--sp-3);
   }
 
-  .long-description {
-    margin: 2rem 0;
-  }
-
-  .desc-content p {
-    font-size: 0.95rem;
-    color: #4b5563;
-    line-height: 1.7;
-    margin: 0 0 1rem;
-  }
-
-  .downloads {
-    margin: 2rem 0;
-  }
-
-  .downloads-list {
+  .download-item {
     display: flex;
-    flex-wrap: wrap;
-    gap: 0.75rem;
-  }
-
-  .download-link {
-    display: inline-block;
-    padding: 0.625rem 1rem;
-    background: #f0f4f8;
-    border: 1px solid #e5e7eb;
-    border-radius: 6px;
+    align-items: center;
+    gap: var(--sp-3);
+    padding: var(--sp-3) var(--sp-4);
+    background: var(--surface-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
     text-decoration: none;
-    color: #374151;
-    font-size: 0.875rem;
-    font-weight: 500;
-    transition: background 0.2s;
+    color: var(--text-hi);
+    font-size: var(--text-sm);
+    font-weight: var(--fw-medium);
+    transition: var(--t-color);
   }
 
-  .download-link:hover {
-    background: #e4eaf0;
+  .download-item:hover {
+    border-color: var(--border-strong);
+    background: var(--clr-n-50);
+  }
+
+  .dl-icon {
+    width: 20px;
+    height: 20px;
+    color: var(--text-brand);
+    flex-shrink: 0;
   }
 </style>

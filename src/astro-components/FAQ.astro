@@ -1,0 +1,57 @@
+---
+interface FAQItem {
+  question: string;
+  answer: string;
+}
+
+interface Props {
+  items: FAQItem[];
+  title?: string;
+}
+
+const { items, title = 'Preguntas frecuentes' } = Astro.props;
+---
+
+<section class="faq" aria-label="Preguntas frecuentes">
+  <h2 class="faq-title">{title}</h2>
+  <div class="faq-list">
+    {items.map((item) => (
+      <details class="faq-item">
+        <summary class="faq-question">{item.question}</summary>
+        <div class="faq-answer">
+          <Fragment set:html={item.answer} />
+        </div>
+      </details>
+    ))}
+  </div>
+</section>
+
+<style>
+.faq { margin: var(--sp-8) 0; }
+.faq-title { font-size: var(--text-xl); font-weight: var(--fw-bold); color: var(--text-hi); margin-bottom: var(--sp-6); }
+.faq-list { display: flex; flex-direction: column; gap: var(--sp-3); }
+.faq-item { background: var(--surface-card); border: 1px solid var(--border); border-radius: var(--radius-md); overflow: hidden; }
+.faq-question {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  padding: var(--sp-4) var(--sp-5);
+  border: none;
+  background: none;
+  text-align: left;
+  font-size: var(--text-base);
+  font-weight: var(--fw-medium);
+  color: var(--text-hi);
+  cursor: pointer;
+  list-style: none;
+  gap: var(--sp-4);
+  transition: var(--t-color);
+}
+.faq-question::-webkit-details-marker { display: none; }
+.faq-question:hover { color: var(--text-brand); }
+.faq-question:focus-visible { outline: var(--ring-focus); outline-offset: -2px; }
+.faq-question::after { content: '+'; font-size: var(--text-xl); font-weight: var(--fw-bold); color: var(--text-low); transition: transform var(--dur-200); flex-shrink: 0; }
+.faq-item[open] .faq-question::after { transform: rotate(45deg); }
+.faq-answer { padding: 0 var(--sp-5) var(--sp-4); font-size: var(--text-sm); color: var(--text-mid); line-height: var(--lh-relaxed); }
+</style>
