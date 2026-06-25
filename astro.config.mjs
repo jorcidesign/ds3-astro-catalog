@@ -2,7 +2,7 @@ import { defineConfig } from 'astro/config';
 
 export default defineConfig({
   site: 'https://jorcidesign.github.io',
-  base: '/ds3-astro-catalog',
+  base: process.env.BASE_URL || '/ds3-astro-catalog',
   output: 'static',
   srcDir: 'src',
 });

@@ -4,7 +4,7 @@
   "version": "0.0.1",
   "type": "module",
   "scripts": {
-    "dev": "astro dev",
+    "dev": "BASE_URL=/ astro dev",
     "build": "astro build",
     "preview": "astro preview",
     "typecheck": "astro check"
