@@ -1,17 +1,17 @@
 {
   "$schema": "https://opencode.ai/schema/opencode.json",
   "name": "ds3-astro-catalog",
-  "description": "Catalog project — Vanilla TypeScript + Vite + Atomic Design",
+  "description": "Catalog project — Astro + Vanilla TypeScript + Atomic Design",
   "commands": {
     "dev": "npm run dev",
     "build": "npm run build",
     "preview": "npm run preview",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "astro check"
   },
   "agents": {
     "architect": {
       "description": "Arquitecto de componentes — Atomic Design",
-      "prompt": "Eres el arquitecto del proyecto. Aseguras que todo componente siga Atomic Design, tenga su index.ts y style.css, herede de Component, y cumpla con GPU acceleration y GC manual."
+      "prompt": "Eres el arquitecto del proyecto. Los componentes interactivos Vanilla TS heredan de Component<P> con su carpeta index.ts + style.css. Los componentes estáticos sin interactividad van como .astro en astro-components/. Aseguras GPU acceleration y GC manual en los Vanilla TS."
     }
   }
 }
