@@ -92,10 +92,12 @@ const tabDef = [
     display: flex;
     align-items: center;
     overflow-x: auto;
+    overflow-y: hidden;
     scrollbar-width: none;
     -ms-overflow-style: none;
     -webkit-overflow-scrolling: touch;
     white-space: nowrap;
+    touch-action: pan-x;
     border-bottom: 2px solid var(--border);
   }
   .tabs::-webkit-scrollbar { display: none; }
